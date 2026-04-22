@@ -9,17 +9,6 @@
 / {
     chosen { zmk,matrix-transform = &imprint_number_row; };
 
-    behaviors {
-        mt: mt {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <175>;
-            require-prior-idle-ms = <150>;
-            bindings = <&kp>, <&kp>;
-        };
-    };
-
     combos {
         compatible = "zmk,combos";
 
@@ -139,6 +128,12 @@
             >;
         };
     };
+};
+
+&mt {
+    flavor = "tap-preferred";
+    tapping-term-ms = <175>;
+    require-prior-idle-ms = <150>;
 };
 
 &trackball_central_listener {

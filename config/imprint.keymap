@@ -9,6 +9,17 @@
 / {
     chosen { zmk,matrix-transform = &imprint_number_row; };
 
+    behaviors {
+        mt: mt {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "tap-preferred";
+            tapping-term-ms = <175>;
+            require-prior-idle-ms = <150>;
+            bindings = <&kp>, <&kp>;
+        };
+    };
+
     combos {
         compatible = "zmk,combos";
 
@@ -67,9 +78,9 @@
         layer_2 {
             bindings = <
 &trans  &trans  &trans        &trans        &trans        &trans              &trans  &trans            &trans           &trans          &trans             &trans
-&trans  &trans  &kp RA(N1)    &kp RA(N2)    &kp RA(N3)    &trans              &trans  &kp LS(LA(P))     &kp LA(P)        &kp LA(N)       &kp LS(LA(N))      &trans
-&trans  &trans  &kp RA(N4)    &kp RA(N5)    &kp RA(N6)    &trans              &trans  &kp LC(LS(PG_UP)) &kp LC(LS(TAB))  &kp LC(TAB)     &kp LC(LS(PG_DN))  &trans
-&trans  &trans  &kp RA(N7)    &kp RA(N8)    &kp RA(N9)    &trans              &trans  &trans            &trans           &trans          &trans             &trans
+&trans  &trans  &kp RA(N7)    &kp RA(N8)    &kp RA(N9)    &trans              &trans  &kp LS(LA(P))     &kp LA(P)        &kp LA(N)       &kp LS(LA(N))      &trans
+&trans  &trans  &kp RA(N4)    &kp RA(N5)    &kp RA(N6)    &trans              &trans  &kp LC(LS(PG_UP)) &kp LC(TAB)      &kp LC(LS(TAB)) &kp LC(LS(PG_DN))  &trans
+&trans  &trans  &kp RA(N1)    &kp RA(N2)    &kp RA(N3)    &trans              &trans  &trans            &trans           &trans          &trans             &trans
         &trans  &trans                                                                                    &trans           &trans
                                     &trans  &trans  &trans   &trans  &kp DOWN  &kp UP
                                     &trans  &trans  &trans   &trans  &trans    &trans

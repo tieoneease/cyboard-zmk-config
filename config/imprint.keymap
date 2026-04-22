@@ -57,7 +57,7 @@
 &kp LSHFT  &mt LSHFT Z   &kp X   &kp C   &kp V   &kp B               &kp N   &kp M     &kp COMMA  &kp DOT  &mt RSHFT FSLH  &kp ENTER
            &kp LGUI  &kp LALT                                                            &kp LBKT  &kp RBKT
                                   &tog 3  &trans  &trans   &trans  &kp LEFT  &kp RIGHT
-                                  &kp LGUI  &kp LALT  &mo 1   &mo 5  &mo 2  &kp SPACE
+                                  &kp LGUI  &kp LALT  &mo 1   &kp SPACE  &mo 2  &mo 5
             >;
         };
 
@@ -70,7 +70,7 @@
 &trans   &trans   &kp N1      &kp N2      &kp N3   &kp N0              &trans   &kp LS(N9)  &kp LS(N0) &trans     &trans   &trans
          &trans   &trans                                                                      &trans     &trans
                                     &trans  &trans  &trans   &kp UP    &kp DOWN  &trans
-                                    &trans  &trans  &trans   &trans    &trans    &mo 4
+                                    &trans  &trans  &trans   &mo 4     &trans    &trans
             >;
         };
 

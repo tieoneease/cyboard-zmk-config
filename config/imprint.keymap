@@ -34,16 +34,6 @@
         };
     };
 
-    behaviors {
-        mclk_scroll: mclk_scroll {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <200>;
-            bindings = <&mo>, <&mkp>;
-        };
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
@@ -55,7 +45,7 @@
 &kp LCTRL  &mt LCTRL A   &kp S   &kp D   &kp F   &kp G               &kp H   &kp J     &kp K      &kp L    &mt LCTRL SEMI  &kp SQT
 &kp LSHFT  &mt LSHFT Z   &kp X   &kp C   &kp V   &kp B               &kp N   &kp M     &kp COMMA  &kp DOT  &mt RSHFT FSLH  &kp ENTER
            &kp LGUI  &kp LALT                                                            &kp LBKT  &kp RBKT
-                                  &tog 3  &trans  &trans   &mkp LCLK  &mclk_scroll 7 MCLK  &mkp RCLK
+                                  &tog 3  &mo 7   &trans   &mkp LCLK  &mkp MCLK  &mkp RCLK
                                   &kp LGUI  &kp LALT  &mo 1   &kp SPACE  &mo 2  &mo 5
             >;
         };
@@ -77,9 +67,9 @@
         layer_2 {
             bindings = <
 &trans  &trans  &trans        &trans        &trans        &trans              &trans  &trans            &trans           &trans          &trans             &trans
-&trans  &trans  &kp RA(N7)    &kp RA(N8)    &kp RA(N9)    &trans              &trans  &kp LS(LA(P))     &kp LA(P)        &kp LA(N)       &kp LS(LA(N))      &trans
-&trans  &trans  &kp RA(N4)    &kp RA(N5)    &kp RA(N6)    &trans              &trans  &kp LC(LS(PG_UP)) &kp LC(LS(TAB))  &kp LC(TAB)     &kp LC(LS(PG_DN))  &trans
-&trans  &trans  &kp RA(N1)    &kp RA(N2)    &kp RA(N3)    &trans              &trans  &trans            &trans           &trans          &trans             &trans
+&trans  &trans  &kp RA(N7)    &kp RA(N8)    &kp RA(N9)    &trans              &trans  &trans            &trans           &trans          &trans             &trans
+&trans  &trans  &kp RA(N4)    &kp RA(N5)    &kp RA(N6)    &trans              &kp LC(LS(PG_UP))  &kp LC(LS(TAB))  &kp LC(TAB)  &kp LC(LS(PG_DN))  &trans  &trans
+&trans  &trans  &kp RA(N1)    &kp RA(N2)    &kp RA(N3)    &trans              &kp LS(LA(P))  &kp LA(P)  &kp LA(N)  &kp LS(LA(N))  &trans  &trans
         &trans  &trans                                                                                    &trans           &trans
                                     &trans  &trans  &trans   &trans  &kp DOWN  &kp UP
                                     &trans  &trans  &trans   &trans  &trans    &trans
@@ -138,7 +128,7 @@
             >;
         };
 
-        // Layer 7 — scroll mode (held middle button activates this)
+        // Layer 7 — scroll mode (hold left upper thumb key to activate)
         scroll_layer {
             bindings = <
 &trans  &trans  &trans  &trans  &trans  &trans              &trans  &trans  &trans  &trans  &trans  &trans

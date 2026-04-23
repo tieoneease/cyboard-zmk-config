@@ -34,16 +34,6 @@
         };
     };
 
-    behaviors {
-        mclk_scroll: mclk_scroll {
-            compatible = "zmk,behavior-hold-tap";
-            #binding-cells = <2>;
-            flavor = "tap-preferred";
-            tapping-term-ms = <200>;
-            bindings = <&mo>, <&mkp>;
-        };
-    };
-
     keymap {
         compatible = "zmk,keymap";
 
@@ -55,7 +45,7 @@
 &kp LCTRL  &mt LCTRL A   &kp S   &kp D   &kp F   &kp G               &kp H   &kp J     &kp K      &kp L    &mt LCTRL SEMI  &kp SQT
 &kp LSHFT  &mt LSHFT Z   &kp X   &kp C   &kp V   &kp B               &kp N   &kp M     &kp COMMA  &kp DOT  &mt RSHFT FSLH  &kp ENTER
            &kp LGUI  &kp LALT                                                            &kp LBKT  &kp RBKT
-                                  &tog 3  &trans  &trans   &mkp LCLK  &mclk_scroll 7 MCLK  &mkp RCLK
+                                  &tog 3  &trans  &trans   &mkp LCLK  &mkp MCLK  &mkp RCLK
                                   &kp LGUI  &kp LALT  &mo 1   &kp SPACE  &mo 2  &mo 5
             >;
         };
@@ -138,18 +128,6 @@
             >;
         };
 
-        // Layer 7 — scroll mode (hold middle click button)
-        scroll_layer {
-            bindings = <
-&trans  &trans  &trans  &trans  &trans  &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans  &trans  &trans  &trans  &trans              &trans  &trans  &trans  &trans  &trans  &trans
-        &trans  &trans                                                        &trans  &trans
-                                &trans  &trans  &trans   &trans  &trans  &trans
-                                &trans  &trans  &trans   &trans  &trans  &trans
-            >;
-        };
     };
 };
 
@@ -159,7 +137,9 @@
     require-prior-idle-ms = <150>;
 };
 
-// Default trackball: cursor movement
 &trackball_central_listener {
-    input-processors = <&zip_xy_scaler 1 1>;
+    input-processors =
+        <&zip_xy_scaler 1 3>,
+        <&zip_xy_to_scroll_mapper>,
+        <&zip_scroll_transform INPUT_TRANSFORM_Y_INVERT>;
 };

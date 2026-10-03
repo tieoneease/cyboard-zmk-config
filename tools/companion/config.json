@@ -1,0 +1,10 @@
+{
+  "repository": "tieoneease/cyboard-zmk-config",
+  "branch": "migration/studio-preserve-current",
+  "workflow": "build.yml",
+  "artifact": "firmware",
+  "files": {
+    "left": "imprint_left-assimilator-bt-zmk.uf2",
+    "right": "imprint_right-assimilator-bt-zmk.uf2"
+  }
+}

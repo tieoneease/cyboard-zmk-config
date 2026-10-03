@@ -1,8 +1,10 @@
-# Cyboard Imprint Studio migration
+# Cyboard Imprint source-managed workbench
 
 ## Objective and baseline
 
-Enable live Studio key editing without replacing the existing source-defined keyboard behavior. This is a source-preserving self-build, **not** Cyboard's full vendor firmware with its runtime trackball configurator.
+Use visual source editing, the fork's existing GitHub builds, and a local guarded UF2 installer without silently replacing the custom keyboard configuration. See [WORKFLOW.md](WORKFLOW.md) for setup, daily use, and recovery boundaries.
+
+The earlier migration enabled standard live Studio key editing while preserving the source definitions. It remains a source-preserving self-build, **not** Cyboard's full vendor firmware with its runtime trackball configurator. The source-managed workflow is now the primary route; live Studio settings are not synchronized into Git.
 
 The preserved source baseline is `2506fead2aaf7351f0c2e95adb47f6a3624bf274` (2026-04-23). GitHub Actions run [24838551182](https://github.com/tieoneease/cyboard-zmk-config/actions/runs/24838551182) successfully built both `assimilator-bt` halves. Its artifacts and logs were no longer available on 2026-10-02. This identifies a successful source revision, not the binary presently flashed on a device.
 
@@ -27,7 +29,7 @@ The migration follows the [official template's pre-July-2026 migration](https://
 - Studio USB snippet and `CONFIG_ZMK_STUDIO=y`: left/central build only. The right/peripheral remains a matching non-Studio split build.
 - `config/info.json` now matches the existing number-row template's 64 positions, rather than the unrelated 82-position editor layout. This JSON is source-editor metadata, not firmware bindings.
 
-Run the one-time source-preservation check from this checkout with Node.js 22 or later:
+Run the one-time source-preservation check from this checkout with Node.js 24 or later:
 
 ```sh
 node --test scripts/check-studio-port.test.mjs
@@ -47,8 +49,26 @@ If each real bootloader exposes `CURRENT.UF2`, copying it **off** its drive is r
 
 Do not publish device readbacks: custom bootloaders may expose private configuration. No readback files belong in this repository.
 
+## Local workbench
+
+`tools/companion/` is the shared loopback dashboard and safety core. `tools/desktop/` packages it with Electrobun 2.0.2 and the devkit's actual Bun 1.4.0 runtime; end users do not install Node or `gh`. The desktop defaults to read-only and requires a separate per-session confirmation to enable writes, then both distinct labelled partial backups and fresh one-shot per-half arming. Tokens use direct GitHub REST access; Windows is session-only on this pinned runtime, while optional macOS/Linux remembering uses the OS credential store, never plaintext fallback. Source-checkout commands remain available under Node.js 24+: `companion` uses `gh` and is read-only; `companion:flash` explicitly enables the write permission. `companion:demo` confines all operations to temporary synthetic files. Neither implementation changes firmware configuration, authorizes the hosted editor, or pushes source.
+
+Before installation it verifies repository, branch, source SHA, successful run/attempt, artifact digest/length, exact filenames, ZIP CRCs, UF2 family/application boundaries, cached-file hashes, and the connected half's current-image hash. The app freezes the selected image at arming; a later branch update does not silently substitute a different image. TTL and browser-heartbeat checks expire abandoned arms. It does not retry writes automatically or equate disconnect with success.
+
+Private readbacks and build caches are kept outside the Git checkout. Both sides need distinct, explicitly labelled current-image records. Volume labels and FAT serials are not unique side identities. Current-image matching narrows wrong-half risk but is not an atomic hardware identity lock; do not unplug, swap devices, or reset during preflight/writing. Windows/macOS/Linux discovery implementations and tests exist; simulated tests are not physical validation on those platforms.
+
+`npm test` exercises the companion, HTTP/auth boundaries, session permissions and shutdown races. `.github/workflows/companion.yml` runs Node checks on three operating systems; `.github/workflows/desktop.yml` adds Node/Bun tests, native packaging and fixture-only runtime smoke on Windows x64, Apple Silicon macOS, Linux x64 and Linux ARM64. The owner approved publishing this setup on `migration/studio-preserve-current`; current remote job results, not workflow definitions alone, establish CI evidence. Local Windows packaged smoke, direct read-only GitHub retrieval and a synthetic OS credential-store roundtrip are not macOS/Linux or physical keyboard acceptance. The historical baseline test is intentionally not a mandatory gate for deliberate keymap edits.
+
 ## Decisions
 
+- Choose Electrobun rather than Electron for a smaller system-webview shell and JavaScript reuse. The owner explicitly needs only Apple Silicon Macs, so its missing Intel Mac release target is acceptable. Use its actual Bun runtime rather than the new Cottontail compatibility runtime; re-prove safety behavior under the exact bundled version. Native builds remain per-host, not cross-platform execution claims from Windows.
+- Use a repository-restricted fine-grained token for standalone GitHub access rather than bundle `gh` or invent an OAuth client/service. Remembering access is opt-in OS storage; the separate editor App authorization stays user-controlled. No automatic import of existing `gh` credentials, no plaintext fallback, no automatic updater or release publishing.
+- Disable Windows Remember on Bun 1.4.0: source inspection and actual synthetic credential metadata showed its `persist` option is ignored and records use enterprise persistence. Reject silent roaming rather than claim a local-only boundary from a mocked option. Session-only access remains functional; defer a supported local-only adapter or runtime upgrade until it can be tested.
+- Fence shutdown before asynchronous preflight can finish; an already-started write refuses normal quit. Keep forced process termination and OS shutdown outside that guarantee. Test socket teardown explicitly because Bun's server-close callback can precede actual connection closure.
+- Package unsigned local/test artifacts without weakening OS security. Signing, notice/source-offer review, native CI execution and physical installation are distinct acceptance/release gates.
+- Reuse the existing visual editor and GitHub compilation rather than build another editor or attempt to clone private vendor Studio features. Integrate only exact-build retrieval, local readbacks, and guarded per-half UF2 submission. No external flasher source was copied.
+- Treat the repository as the master configuration. Source commits require compilation/installation; separate runtime Studio settings can diverge and are not presented as synchronized.
+- Retain partial captures as evidence, not as a claimed rollback solution. Require both side records and current-image matching, but keep full recovery and physical acceptance as separate gates. The first hardware installation still needs explicit approval.
 - Keep the complete source-defined behavior as the first reversible Studio experiment. Do not substitute stock vendor firmware while silently losing combos or tap-hold tuning. The full vendor trackball UI remains a separate migration target.
 - Pin the supported release pair rather than rebuild the old moving-`main` manifest. A new build is a port, not a reproduction of the April binary.
 - Use the actual chosen 64-position layout and preserve binding order; do not use the stale 82-position editor JSON as the hardware definition.

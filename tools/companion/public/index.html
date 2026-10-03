@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imprint Workbench</title>
+  <link rel="icon" type="image/svg+xml" href="/assets/imprint.svg">
+  <link rel="stylesheet" href="/styles.css"><script type="module" src="/app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <div class="brand"><svg viewBox="0 0 42 34" aria-hidden="true"><path d="M2 3h15v21H2zM25 3h15v21H25zM10 28h7v4h-7zM25 28h7v4h-7z"/><path d="M7 8h5M7 13h5M7 18h5M30 8h5M30 13h5M30 18h5"/></svg><h1>Imprint <span>Workbench</span></h1></div>
+      <div class="header-actions"><span id="mode" class="badge">Starting locally</span><a href="/guide" target="_blank" rel="noopener">Setup & recovery guide <span aria-hidden="true">↗</span></a></div>
+    </header>
+    <div id="demo-notice" class="notice demo" hidden><strong>Simulation.</strong> All device reads and writes use temporary fixtures. Your keyboard is never accessed.</div>
+    <nav class="workflow" aria-label="Workflow"><span><b>1</b> Edit source</span><i aria-hidden="true"></i><span><b>2</b> Build firmware</span><i aria-hidden="true"></i><span><b>3</b> Install by half</span></nav>
+    <div id="error" class="notice error" role="alert" hidden></div>
+    <main class="workspace">
+      <div class="source-build">
+        <section class="source-section" aria-labelledby="source-title">
+          <div class="section-heading"><div><p class="label">SOURCE OF TRUTH</p><h2 id="source-title">Your configuration, in Git.</h2></div><a class="button secondary" href="https://nickcoutsos.github.io/keymap-editor/" target="_blank" rel="noopener noreferrer">Open visual editor <span aria-hidden="true">↗</span></a></div>
+          <p class="intro">Edit keys, layers, combos, and hold-tap settings in ZMK Keymap Editor. Save to this repository and branch; GitHub builds the firmware automatically.</p>
+          <dl class="source-details"><div><dt>Repository</dt><dd><a id="repo-link" target="_blank" rel="noopener"></a></dd></div><div><dt>Branch</dt><dd id="branch" class="mono"></dd></div></dl>
+          <details class="help"><summary>First time using the editor?</summary><p>Choose <strong>GitHub</strong> in the editor. Authorize only this config repository, then select the branch shown above. Confirm the loaded file is <code>config/imprint.keymap</code>. Its matching <code>info.json</code> supplies the 64-key layout. Authorization needs your consent; this app cannot grant it.</p><p>The repo—not separate live Studio edits—is the source of truth. Trackball processor rules remain in source.</p></details>
+        </section>
+        <section class="build-section" aria-labelledby="build-title">
+          <div class="section-heading"><div><p class="label">GITHUB ACTIONS</p><h2 id="build-title">Build & verify</h2></div><button id="check" class="text-button" disabled>Check now</button></div>
+          <div class="build-summary"><span id="build-dot" class="status-dot"></span><div><strong id="build-status">Checking your branch…</strong><p id="commit-message">No firmware has been selected.</p></div><a id="run-link" target="_blank" rel="noopener" hidden>View build ↗</a></div>
+          <div class="commit-strip"><span>Source commit</span><code id="sha">—</code><span id="checked-at"></span></div>
+          <details id="github-access" class="access" hidden>
+            <summary><strong>GitHub access</strong> <span id="access-status">Not connected</span></summary>
+            <div class="access-body">
+              <div id="access-signed-out">
+                <p class="small">Checking the build works without a token. Downloading firmware and Rebuild need a fine-grained token that you create and authorize yourself. It is separate from the GitHub authorization you give the visual editor. Never enter your GitHub password here.</p>
+                <ol class="access-steps small">
+                  <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">GitHub fine-grained token settings <span aria-hidden="true">↗</span></a>.</li>
+                  <li>Repository access: <strong>Only select repositories</strong>, then choose <strong id="access-repo">this repository</strong> only.</li>
+                  <li>Permissions: <strong>Contents: Read-only</strong> and <strong>Actions: Read-only</strong>. Choose <strong>Actions: Read and write</strong> instead only if you want Rebuild.</li>
+                </ol>
+                <form id="access-form" class="access-form" autocomplete="off" novalidate>
+                  <label for="token-input">Fine-grained token</label>
+                  <div class="access-row"><input id="token-input" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" aria-describedby="access-error token-help"><button id="access-connect" type="submit" class="button secondary">Connect</button></div>
+                  <label class="confirmation compact"><input id="remember" type="checkbox"><span id="remember-label">Remember in the system credential store</span></label>
+                  <p id="token-help" class="small">Without Remember, the token stays in memory for this session only and is forgotten when the app quits. The token is checked with GitHub before it replaces anything.</p>
+                </form>
+              </div>
+              <div id="access-signed-in" hidden>
+                <p id="access-session" class="small"></p>
+                <div class="access-actions"><button id="access-verify" class="button secondary" hidden>Verify saved token</button><button id="access-disconnect" class="button secondary">Disconnect</button></div>
+              </div>
+              <p id="access-error" class="access-error" hidden></p>
+            </div>
+          </details>
+          <p id="access-note" class="small access-note" role="status" hidden></p>
+          <p id="access-storage" class="access-warning" hidden></p>
+          <p id="access-required" class="small access-required" hidden>Connect GitHub access above to download firmware or request a rebuild. Checking the build works without it.</p>
+          <div class="build-actions"><button id="prepare" class="button primary" disabled>Download & verify firmware</button><button id="rebuild" class="button secondary" disabled>Rebuild current commit</button></div>
+          <p class="small">Only a successful build of this branch’s current commit can be prepared. No source changes are pushed by this app.</p>
+          <div id="firmware" class="firmware" hidden></div>
+        </section>
+        <section class="activity-section" aria-labelledby="activity-title"><div class="section-heading"><h2 id="activity-title">Activity</h2><span id="busy" class="small" role="status" aria-live="polite">Ready</span></div><ol id="activity"><li>No operations yet. Nothing flashes automatically on launch.</li></ol></section>
+      </div>
+      <aside class="install-section" aria-labelledby="install-title">
+        <div class="section-heading"><div><p class="label">PHYSICAL KEYBOARD</p><h2 id="install-title">One half at a time.</h2></div></div>
+        <p class="intro">Choose the physical half. Connect it by USB, then double-tap reset to enter bootloader mode.</p>
+        <div class="halves" role="group" aria-label="Physical half">
+          <button class="half" id="half-left" aria-pressed="true"><svg viewBox="0 0 110 84" aria-hidden="true"><path d="M9 12L72 6l8 51-65 8zM75 58l23 10-8 13-19-13z"/><path d="M20 23l11-1 1 11-11 1zM39 21l11-1 1 11-11 1zM58 19l11-1 1 11-11 1zM22 42l11-1 1 11-11 1zM41 40l11-1 1 11-11 1zM60 38l11-1 1 11-11 1z"/></svg><strong>Left</strong><span id="left-backup">No backup captured</span></button>
+          <button class="half" id="half-right" aria-pressed="false"><svg viewBox="0 0 110 84" aria-hidden="true"><g transform="translate(110 0) scale(-1 1)"><path d="M9 12L72 6l8 51-65 8zM75 58l23 10-8 13-19-13z"/><path d="M20 23l11-1 1 11-11 1zM39 21l11-1 1 11-11 1zM58 19l11-1 1 11-11 1zM22 42l11-1 1 11-11 1zM41 40l11-1 1 11-11 1zM60 38l11-1 1 11-11 1z"/></g></svg><strong>Right</strong><span id="right-backup">No backup captured</span></button>
+        </div>
+        <div class="device"><span id="device-dot" class="status-dot"></span><div><strong id="device-status">Looking for a bootloader</strong><p id="device-detail" class="small">Normal keyboard mode is not a flash target.</p></div></div>
+        <div id="demo-controls" class="demo-controls" hidden><span class="small">Simulate bootloader connection</span><div><button data-demo="left">Left</button><button data-demo="right">Right</button><button data-demo="none">Unplug</button></div></div>
+        <label class="confirmation"><input id="confirm" type="checkbox"><span>I have identified the <strong id="selected-label">left</strong> physical half. I understand that a partial readback is <strong>not a complete or tested rollback</strong>.</span></label>
+        <label id="replace-control" class="confirmation" hidden><input id="replace" type="checkbox"><span>Replace the saved <strong id="replace-label">left</strong> identity record with this capture. Earlier files are kept. Do this only after checking the physical half.</span></label>
+        <button id="capture" class="button secondary wide" disabled>Capture left backup</button>
+        <p class="small backup-note">Before the first install, capture both halves. Two identical reads are saved privately outside the repo. Settings, pairing data, and other flash regions may be absent.</p>
+        <div class="install-action">
+          <div id="write-mode" class="write-mode" hidden>
+            <strong id="write-mode-status">Read-only hardware</strong>
+            <p id="write-mode-detail" class="small"></p>
+            <label id="write-enable-control" class="confirmation compact"><input id="write-confirm" type="checkbox"><span>Allow hardware writes for this session. This does not arm or start an install, and a partial backup is <strong>not a complete or tested rollback</strong>.</span></label>
+            <div class="write-mode-actions"><button id="write-enable" class="button secondary" disabled>Enable hardware writes</button><button id="write-disable" class="button secondary" hidden>Return to read-only</button></div>
+          </div>
+          <button id="arm" class="button primary wide" disabled>Arm left install</button><button id="cancel" class="button danger wide" hidden>Cancel installation</button><p id="install-reason" class="small">Prepare firmware and capture both backups first.</p></div>
+        <div id="result" class="result" role="status" hidden></div>
+        <details class="help"><summary>What happens after arming?</summary><p>The app waits for one compatible drive, compares its current image with the selected half’s backup, then submits the exact verified UF2 once. Keep this page open and do not unplug during writing.</p><p>Arming expires after two minutes or if the browser stops responding. A transfer is not a hardware behavior test. An interrupted transfer is reported as unverified and never retried automatically.</p></details>
+      </aside>
+    </main>
+    <footer><span><span id="companion-kind">Local companion</span> · no vendor firmware substitution · no settings reset</span><span id="cache-note"></span></footer>
+  </div>
+</body>
+</html>

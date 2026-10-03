@@ -1,0 +1,26 @@
+{
+  "name": "cyboard-imprint-workbench",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "companion": "node tools/companion/cli.mjs",
+    "companion:flash": "node tools/companion/cli.mjs --allow-flash",
+    "companion:demo": "node tools/companion/cli.mjs --demo",
+    "desktop:prepare": "electrobun prepare",
+    "desktop:build": "electrobun build --env=stable",
+    "desktop:dev": "electrobun dev",
+    "desktop:smoke": "node scripts/desktop-smoke.mjs",
+    "test": "node --test tools/companion/test/*.test.mjs",
+    "test:baseline": "node --test scripts/check-studio-port.test.mjs"
+  },
+  "dependencies": {
+    "yauzl": "3.4.0"
+  },
+  "devDependencies": {
+    "electrobun": "2.0.2"
+  }
+}

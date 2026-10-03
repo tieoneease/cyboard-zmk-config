@@ -1,0 +1,14 @@
+node_modules/
+.dev/
+.companion/
+.hutch/
+desktop-build/
+desktop-artifacts/
+*.log
+.env
+.env.*
+!.env.example
+# Device readbacks and firmware belong in the private cache, never this repo.
+*.uf2
+*.bin
+*.zip

@@ -1,0 +1,208 @@
+name: Desktop packages
+
+# Native build and packaged-runtime smoke per released Electrobun target.
+# Produces unsigned test artifacts only: no signing secrets, no GitHub Release,
+# no update-host upload. Hardware is never enumerated or written.
+
+on:
+  push:
+    paths:
+      - .github/workflows/desktop.yml
+      - electrobun.config.ts
+      - hutch.config.ts
+      - package.json
+      - package-lock.json
+      - WORKFLOW.md
+      - scripts/desktop-smoke.mjs
+      - scripts/make-desktop-icons.ps1
+      - tools/companion/**
+      - tools/desktop/**
+  pull_request:
+    paths:
+      - .github/workflows/desktop.yml
+      - electrobun.config.ts
+      - hutch.config.ts
+      - package.json
+      - package-lock.json
+      - WORKFLOW.md
+      - scripts/desktop-smoke.mjs
+      - scripts/make-desktop-icons.ps1
+      - tools/companion/**
+      - tools/desktop/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  package:
+    name: ${{ matrix.target }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: win-x64
+            runner: windows-latest
+            platform: win32
+            arch: x64
+            installer: win-x64-ImprintWorkbench-Setup.zip
+            payload: stable-win-x64-ImprintWorkbench.tar.zst
+          # Electrobun 2.0.2 publishes no Intel macOS core; Apple Silicon only.
+          - target: macos-arm64
+            runner: macos-latest
+            platform: darwin
+            arch: arm64
+            installer: macos-arm64-ImprintWorkbench.dmg
+            payload: stable-macos-arm64-ImprintWorkbench.app.tar.zst
+          - target: linux-x64
+            runner: ubuntu-24.04
+            platform: linux
+            arch: x64
+            installer: linux-x64-ImprintWorkbench-Setup.tar.gz
+            payload: stable-linux-x64-ImprintWorkbench.tar.zst
+          - target: linux-arm64
+            runner: ubuntu-24.04-arm
+            platform: linux
+            arch: arm64
+            installer: linux-arm64-ImprintWorkbench-Setup.tar.gz
+            payload: stable-linux-arm64-ImprintWorkbench.tar.zst
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    env:
+      # Never sign or notarize in CI (electrobun.config.ts reads this flag).
+      IMPRINT_SIGN_MAC: '0'
+      # Optional saved real-hardware/GitHub evidence stays local; these tests skip.
+      FIRMWARE_ARTIFACT_ZIP: ''
+      GITHUB_EVIDENCE_DIR: ''
+      UF2_CANDIDATE_DIR: ''
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24'
+          cache: npm
+
+      # Same Bun release as the Electrobun 2.0.2 devkit main-process runtime.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.0
+
+      - name: Check host target and toolchain versions
+        run: |
+          # shellcheck disable=SC2016 # single-quoted JavaScript template literals
+          node -e '
+            const [platform, arch] = process.argv.slice(1);
+            if (process.platform !== platform || process.arch !== arch) {
+              throw new Error(`Runner is ${process.platform}-${process.arch}, expected ${platform}-${arch}`);
+            }
+            if (Number(process.versions.node.split(".")[0]) < 24) throw new Error(`Node ${process.version} < 24`);
+            console.log(`Node ${process.version} on ${process.platform}-${process.arch}`);
+          ' '${{ matrix.platform }}' '${{ matrix.arch }}'
+          revision="$(bun --revision)"
+          echo "Bun ${revision}"
+          # Official bun-v1.4.0 tag commit 34cbb9a40b4b...; matches the devkit Bun.
+          if [ "$revision" != '1.4.0+34cbb9a40' ]; then
+            echo "::error::Expected Bun 1.4.0+34cbb9a40, found ${revision}"; exit 1
+          fi
+
+      - run: npm ci --ignore-scripts
+
+      - name: Test (Node)
+        run: npm test
+
+      - name: Test (Bun 1.4.0)
+        run: bun test tools/companion/test
+
+      - name: Build desktop package
+        timeout-minutes: 30
+        run: npm run desktop:build
+
+      - name: Check expected package files
+        run: |
+          for file in '${{ matrix.installer }}' '${{ matrix.payload }}'; do
+            if [ ! -s "desktop-artifacts/$file" ]; then
+              echo "::error::Missing desktop-artifacts/$file"
+              ls -la desktop-artifacts || true
+              exit 1
+            fi
+          done
+
+      # Electrobun links GTK 3, WebKitGTK 4.1, Ayatana AppIndicator and librsvg.
+      # Install the documented runtime packages only if a library is absent.
+      - name: Ensure Linux runtime libraries and virtual display
+        if: runner.os == 'Linux'
+        run: |
+          cache="$(/sbin/ldconfig -p)"
+          missing=()
+          for soname in libgtk-3.so.0 libwebkit2gtk-4.1.so.0 libayatana-appindicator3.so.1 librsvg-2.so.2; do
+            grep -q "^[[:space:]]*${soname} " <<<"$cache" || missing+=("$soname")
+          done
+          packages=()
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "Missing runtime libraries: ${missing[*]}"
+            packages+=(libgtk-3-0 libwebkit2gtk-4.1-0 libayatana-appindicator3-1 librsvg2-2)
+          fi
+          command -v xvfb-run >/dev/null || packages+=(xvfb)
+          if [ ${#packages[@]} -gt 0 ]; then
+            sudo apt-get update
+            sudo apt-get install -y "${packages[@]}"
+          else
+            echo "Runtime libraries and xvfb-run already present."
+          fi
+
+      # WebView2 is an expected host runtime; report it, never install or relax it.
+      - name: Report WebView2 runtime
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $keys = @(
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          )
+          $version = $keys | ForEach-Object { (Get-ItemProperty -Path $_ -ErrorAction SilentlyContinue).pv } | Where-Object { $_ -and $_ -ne '0.0.0.0' } | Select-Object -First 1
+          if ($version) { "WebView2 Runtime $version" } else { "::warning::WebView2 Runtime registration not found; the packaged smoke is the decisive check." }
+
+      - name: Packaged runtime smoke
+        if: runner.os != 'Linux'
+        timeout-minutes: 5
+        run: npm run desktop:smoke
+
+      - name: Packaged runtime smoke (Xvfb)
+        if: runner.os == 'Linux'
+        timeout-minutes: 5
+        run: xvfb-run -a -s '-screen 0 1280x800x24' npm run desktop:smoke
+
+      - name: Record package digests
+        run: |
+          # shellcheck disable=SC2016 # single-quoted JavaScript template literals
+          node -e '
+            const { createHash } = require("node:crypto");
+            const { readFileSync, writeFileSync } = require("node:fs");
+            const [target, ...files] = process.argv.slice(1);
+            const lines = files.map((f) => `${createHash("sha256").update(readFileSync(`desktop-artifacts/${f}`)).digest("hex")}  ${f}`);
+            writeFileSync(`desktop-artifacts/SHA256SUMS-${target}.txt`, lines.join("\n") + "\n", { flag: "wx" });
+            console.log(lines.join("\n"));
+          ' '${{ matrix.target }}' '${{ matrix.installer }}' '${{ matrix.payload }}'
+
+      - name: Upload unsigned package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: imprint-workbench-unsigned-${{ matrix.target }}
+          path: |
+            desktop-artifacts/${{ matrix.installer }}
+            desktop-artifacts/${{ matrix.payload }}
+            desktop-artifacts/SHA256SUMS-${{ matrix.target }}.txt
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

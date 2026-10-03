@@ -14,8 +14,10 @@ const archive = path.resolve('desktop-artifacts', `stable-${platform}-${process.
 await fs.access(archive);
 const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'imprint-package-smoke-'));
 const reportPath = path.join(temp, 'report.json');
+// Hutch preserves the macOS display-name spaces inside the archive even though
+// the artifact filename above is space-stripped (verified against native CI output).
 const executable = process.platform === 'darwin'
-  ? path.join(temp, 'ImprintWorkbench.app', 'Contents', 'MacOS', 'launcher')
+  ? path.join(temp, 'Imprint Workbench.app', 'Contents', 'MacOS', 'launcher')
   : path.join(temp, 'ImprintWorkbench', 'bin', process.platform === 'win32' ? 'launcher.exe' : 'launcher');
 // Deliberately remove Node, Bun and gh from PATH. Keep only OS utilities needed by the launcher.
 const env = { ...process.env, IMPRINT_SMOKE_REPORT: reportPath, ELECTROBUN_CONSOLE: '1',

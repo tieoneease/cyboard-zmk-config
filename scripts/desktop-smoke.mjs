@@ -33,7 +33,15 @@ try {
   await fs.writeFile(tar, zstdDecompressSync(await fs.readFile(archive), { maxOutputLength: 300 * 1024 * 1024 }), { flag: 'wx' });
   const tarTool = process.platform === 'win32' ? path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'tar.exe') : 'tar';
   await promisify(execFile)(tarTool, ['-xf', tar, '-C', temp], { shell: false, windowsHide: true, timeout: 30000 });
-  await fs.access(executable);
+  try {
+    await fs.access(executable);
+  } catch (error) {
+    const listing = await promisify(execFile)(tarTool, ['-tf', tar],
+      { shell: false, windowsHide: true, timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
+    await fs.writeFile(path.join(temp, 'payload-members.txt'), listing.stdout, { flag: 'wx' });
+    console.error(`Expected packaged launcher: ${executable}\nArchive members:\n${listing.stdout.slice(0, 16000)}`);
+    throw error;
+  }
   const reportReady = (async () => {
     for await (const event of fs.watch(temp, { signal: watching.signal })) {
       if (event.filename === 'report.json') {

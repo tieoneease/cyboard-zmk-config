@@ -183,6 +183,18 @@ jobs:
         timeout-minutes: 5
         run: xvfb-run -a -s '-screen 0 1280x800x24' npm run desktop:smoke
 
+      # Preserve the exact application-only payload when native validation fails.
+      # It contains no credentials, device readbacks, or firmware artifacts.
+      - name: Upload failed package for diagnosis
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: imprint-workbench-diagnostic-${{ matrix.target }}
+          path: desktop-artifacts/${{ matrix.payload }}
+          if-no-files-found: warn
+          retention-days: 7
+          compression-level: 0
+
       - name: Record package digests
         run: |
           # shellcheck disable=SC2016 # single-quoted JavaScript template literals

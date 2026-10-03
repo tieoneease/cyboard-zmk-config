@@ -107,8 +107,9 @@ test('fingerprint changes when the INFO metadata or the volume changes', async (
   assert.notEqual(updated.fingerprint, first.fingerprint);
   assert.notEqual(updated.id, first.id);
 
-  // Remount at the same path with identical metadata: a new directory is a new dev/ino.
-  await fs.rm(root, { recursive: true });
+  // Keep the retired volume allocated: deleting first lets Linux immediately reuse
+  // both inodes, which does not represent a controlled filesystem-identity change.
+  await fs.rename(root, path.join(dir, 'retired-VOL'));
   await volume(dir, 'VOL', GOOD_INFO);
   const [remounted] = await discoverDrives({ roots: [root], run: noRun });
   assert.equal(remounted.root, first.root);

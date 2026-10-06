@@ -2,7 +2,7 @@
 
 Your configuration, kept in source: **visual editor → GitHub build → guarded per-half UF2 installation**.
 
-This fork retains the seven-layer, 64-key Imprint configuration, custom combos and hold-taps, Windows shortcuts, and right-trackball source rules. It targets `migration/studio-preserve-current` and leaves `main` unchanged.
+This fork retains the original seven-layer, 64-key Imprint configuration, with an eighth automatic layer protecting the left side during game mode. Custom combos and hold-taps, Windows shortcuts, and right-trackball source rules remain available outside game mode. See [Game mode](WORKFLOW.md#game-mode) for the toggle's scope. The global A+F Studio-unlock chord is disabled; explicit layer-6 unlock keys remain. It targets `migration/studio-preserve-current` and leaves `main` unchanged.
 
 ## Desktop app
 
@@ -36,7 +36,7 @@ Open **http://127.0.0.1:4765**. On Windows, [`scripts/start-companion.cmd`](scri
 
 ```sh
 npm run companion:demo   # temporary simulated devices; no GitHub or host-volume scans
-npm test                # validation and safety checks
+npm test                # game-mode source checks, validation and safety checks
 npm run desktop:build   # native desktop package for this host
 npm run desktop:smoke   # packaged fixture-only check; needs a desktop/display
 ```

@@ -2,7 +2,7 @@
 
 This is the source-managed workflow for `tieoneease/cyboard-zmk-config`. It reuses **ZMK Keymap Editor**, the existing **GitHub Actions firmware build**, and a small **local UF2 workbench**. It does not substitute Cyboard's stock firmware or attempt to recreate its private Studio extensions.
 
-The source configuration remains in `config/imprint.keymap`. Ordinary keys, seven layers, four combos, custom hold-tap timing, Windows shortcuts, and the right-trackball source rules are retained. Physical equivalence of the new firmware is still a hardware-validation task.
+The source configuration remains in `config/imprint.keymap`. Original layers 0–6, four combos, custom hold-tap timing, Windows shortcuts, and the right-trackball source rules are retained outside game mode. An eighth automatic layer protects the left side while the existing game toggle is active; see [Game mode](#game-mode). Physical equivalence of the new firmware is still a hardware-validation task.
 
 ## One-time setup
 
@@ -56,7 +56,7 @@ Open https://nickcoutsos.github.io/keymap-editor/ in Chrome or Edge.
 2. Complete the GitHub authorization/installation yourself. Grant the editor access to **only `tieoneease/cyboard-zmk-config`**, not unrelated repositories.
 3. Select that repository and the **`migration/studio-preserve-current`** branch in the editor's branch picker. Do not leave it on `main`.
 4. Confirm the loaded keymap is `config/imprint.keymap` (choose it if prompted). The matching `config/info.json` describes your **64-position number-row layout**.
-5. Confirm seven layers, the thumb-key order, and the four combos before saving a change.
+5. Confirm eight layers (the original seven plus automatic `game_guard_layer`), the thumb-key order, and the four combos before saving a change. Preserve the conditional rule from layer 3 to layer 7 and the Escape/Tab combo layer restrictions.
 
 The editor's source supports selecting and committing to non-default branches. Its initial default can still be `main`; branch selection matters. The older `main` metadata described 82 positions and is not the intended editor profile.
 
@@ -131,12 +131,27 @@ Arming freezes the verified commit; a later branch update does not silently subs
 
 After an installation changes a half's current image, explicitly replace that half's saved identity record with a new capture before a future installation. Earlier captures remain in their own timestamped private folders. A mismatch is a stop condition, not a reason to bypass the check.
 
+## Game mode
+
+Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatically enables the highest-priority protection layer 7; do not activate layer 7 directly.
+
+- **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, both Windows/Alt key pairs, and non-gaming actions from higher layers.
+- **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift, thumb Space, and the same game toggle to exit.
+- **Right side:** bindings, Backspace/Enter chords, mouse controls, and layer access remain unchanged. Holding a right-hand layer key does not remove left-side protection.
+- **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
+
+The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n`. Studio still requires unlocking: with game mode off, hold MO5, hold the left pinky's layer-6 key, then press either explicit Studio-unlock key (the T/Y positions). This preserves access without a global gaming chord.
+
+These are source changes, not live Studio edits. They need a successful firmware build and an explicitly approved installation before the keyboard changes. Existing saved Studio key bindings can override compiled bindings; check them if the flashed behavior differs. Do not use a settings-reset image casually.
+
 ## Hardware acceptance checklist
 
 Before accepting the new firmware, verify:
 
-- All grid and thumb positions and all seven layer transitions.
-- Four combos and the original 50 ms combo timing.
+- All grid and thumb positions and original layer transitions; game protection layer 7 automatically follows TG3.
+- All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, even while MO2/MO5 are held; right-hand Backspace/Enter combos still work.
+- Game mode blocks both left GUI/Alt pairs, keeps Ctrl/Shift/Space available, prevents higher-layer left shortcuts, and exits using the same thumb toggle.
+- Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.
 - Ctrl/A, Ctrl/semicolon, Shift/Z, and right-Shift/slash Mod-Taps and typing feel.
 - Windows Right-Alt-number, Alt-P/N, and shifted Alt-P/N shortcuts.
 - Right trackball: cursor mode normally, scrolling on layer 2, intended speed and scroll direction, unchanged cursor direction.
@@ -182,12 +197,15 @@ The UI is explicitly labelled **Simulation**. Its fake GitHub build and fake boo
 
 ```sh
 npm test
+npm run test:game
 npm run test:baseline
 ```
 
+`test:game` is the ongoing source-level game-mode regression check, also included in `npm test`. It checks all combinations of existing overlay layers but is not a firmware simulator or a hardware timing test.
+
 The main tests cover provenance, ZIP bounds/CRC, UF2 bounds, readback identity, arming/cancellation/shutdown, GitHub HTTP credential/redirect protections, auth/storage failures, HTTP origin/session protections, and simulated transfers. Desktop CI also runs them under the exact bundled Bun version. See `tools/desktop/README.md` for native package smoke checks; neither those checks nor browser proofs establish physical keyboard behavior. Some real-file symlink tests may skip on Windows without symlink privilege; the in-memory rejection test and junction tests still run. Optional evidence tests accept `UF2_CANDIDATE_DIR` (the directory of both UF2s), `FIRMWARE_ARTIFACT_ZIP` (the original ZIP), and `GITHUB_EVIDENCE_DIR` (the retention root containing both `firmware-artifact.zip` and the `evidence/` subdirectory), all outside the repo.
 
-`test:baseline` is the original one-time preservation guard. It deliberately rejects intentional later keymap changes, so it is **not** a required check for everyday edits. Keep it as historical evidence or explicitly update its baseline when requirements change; do not confuse its expected failure after editing with the normal firmware build.
+`test:baseline` is the original one-time preservation guard. It now intentionally fails because game-mode protection changes the keymap, so it is **not** a required check for everyday edits. Keep it as historical evidence or explicitly update its baseline when requirements change; do not confuse its expected failure after editing with the normal firmware build.
 
 ## Troubleshooting
 

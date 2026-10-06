@@ -14,7 +14,8 @@
     "desktop:build": "electrobun build --env=stable",
     "desktop:dev": "electrobun dev",
     "desktop:smoke": "node scripts/desktop-smoke.mjs",
-    "test": "node --test tools/companion/test/*.test.mjs",
+    "test": "node --test scripts/check-game-mode.test.mjs tools/companion/test/*.test.mjs",
+    "test:game": "node --test scripts/check-game-mode.test.mjs",
     "test:baseline": "node --test scripts/check-studio-port.test.mjs"
   },
   "dependencies": {

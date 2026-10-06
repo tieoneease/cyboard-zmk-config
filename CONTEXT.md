@@ -10,14 +10,24 @@ The preserved source baseline is `2506fead2aaf7351f0c2e95adb47f6a3624bf274` (202
 
 ## Preserved behavior
 
-- Seven layers, each with 64 bindings, in the original order. The last 12 positions are the two thumb arcs on each hand.
-- Four source-defined 50 ms combos: positions 20+21 for Backspace, 32+33 for Enter, 14+15 for Escape, and 26+27 for Tab.
+- Original layers 0–6 retain their indices and 64 bindings. An eighth, automatic game-protection layer is appended at index 7. The last 12 positions are the two thumb arcs on each hand.
+- Four source-defined 50 ms combos: positions 20+21 for Backspace and 32+33 for Enter remain global; 14+15 for Escape and 26+27 for Tab are available only outside game mode.
 - Mod-tap assignments and `tap-preferred`, 175 ms tapping term, 150 ms prior-idle requirement.
 - Right/peripheral trackball: layer 2 enables XY-to-scroll mapping, 1/3 scaling, and scroll Y inversion.
 - Mouse, RGB, Bluetooth, reset/bootloader and existing Studio-unlock bindings.
 - Exact Right-Alt-number, Alt-P/N and shifted Alt-P/N outputs used by the Windows desktop setup. No host remapping is added.
 
-Only the chosen layout declaration changes in `config/imprint.keymap`.
+The original Studio migration changed only the chosen layout declaration in `config/imprint.keymap`. The subsequent game-mode change intentionally adds the protection described below.
+
+### Game toggle
+
+The existing `&tog 3` left-thumb key still enters and exits game mode. While layer 3 is active, a conditional layer 7 takes precedence over all existing layers on the left: plain letters/numbers, dedicated Ctrl/Shift/Escape/Tab, and thumb Space remain; both left GUI/Alt pairs and unused thumb keys are blocked with `&none`. This also prevents left-hand desktop shortcuts, media controls, and keyboard-control actions from leaking through while a right-hand layer key is held. Right-hand bindings stay transparent, including its two combos and layer/trackball controls. Toggle game mode off before using left-hand non-gaming layers.
+
+Escape/Tab combos allow only layers `0 1 2 4 5 6`. [ZMK v0.3.0 filters combos by the highest active layer](https://github.com/zmkfirmware/zmk/blob/v0.3.0/app/src/combo.c), not by whether layer 3 is somewhere in the stack. The automatic layer 7 therefore keeps the exclusion effective even with higher non-gaming layers held, without renumbering saved layer references. Do not toggle layer 7 directly. Release held keys before switching modes; this is not a cancellation mechanism for an already-pressed modifier or an in-flight combo.
+
+The separate Cyboard A+F 3-second Studio-unlock chord is disabled globally with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n` in `config/imprint.conf`, as approved by the owner. Its pinned listener has no layer filter, so the game guard alone cannot block it. The module's [Kconfig](https://github.com/Cyboard-DigitalTailor/zmk-keyboards/blob/5a0552e9ddc2df919ec491e89102625a1e39324e/Kconfig) and [CMake gate](https://github.com/Cyboard-DigitalTailor/zmk-keyboards/blob/5a0552e9ddc2df919ec491e89102625a1e39324e/CMakeLists.txt) make this independent of Studio locking and the explicit layer-6 unlock bindings, which remain available.
+
+`npm run test:game` checks the source configuration, all 32 combinations of other layers with game mode on/off, left-side protection, and right-side transparency. It is also included in `npm test`; it does not run firmware or establish physical timing. Firmware compilation and keyboard acceptance remain required before installation.
 
 ## Build and checks
 
@@ -39,7 +49,7 @@ The check compares against the original Git commit. It intentionally rejects lat
 
 Before flashing, both firmware builds must succeed and their UF2 files must be retained locally with source revision and SHA-256 hashes. Keep the original rollback artifacts in a separate directory. Do not use a settings-reset image as part of this migration by default.
 
-After an explicitly approved flash, connect USB to the left half. The existing `&studio_unlock` bindings are on layer 6 (hold layer 5, then the layer-6 key). The pinned shield also documents an A/F-position hold-to-unlock combo. Check every grid and thumb key, layer switching, all four custom combos, mod-tap timing, right-trackball scroll, Windows shortcuts, mouse buttons, and persistence before accepting the migration.
+After an explicitly approved flash, connect USB to the left half. The existing `&studio_unlock` bindings are on layer 6 (hold layer 5, then the layer-6 key). The shield's A/F-position hold-to-unlock combo is deliberately disabled in this build. Check every grid and thumb key, layer switching, all four custom combos, mod-tap timing, right-trackball scroll, Windows shortcuts, mouse buttons, and persistence before accepting the migration.
 
 ## Backup boundary
 
@@ -69,6 +79,8 @@ Private readbacks and build caches are kept outside the Git checkout. Both sides
 - Reuse the existing visual editor and GitHub compilation rather than build another editor or attempt to clone private vendor Studio features. Integrate only exact-build retrieval, local readbacks, and guarded per-half UF2 submission. No external flasher source was copied.
 - Treat the repository as the master configuration. Source commits require compilation/installation; separate runtime Studio settings can diverge and are not presented as synchronized.
 - Retain partial captures as evidence, not as a claimed rollback solution. Require both side records and current-image matching, but keep full recovery and physical acceptance as separate gates. The first hardware installation still needs explicit approval.
+- Disable the layer-independent A+F Studio-unlock listener globally rather than allow accidental unlock during gaming or maintain a custom listener fork. The owner approved removing the chord; Studio locking and explicit layer-6 unlock keys remain.
+- Append an automatic highest-priority game guard instead of renumbering existing layers or merely excluding layer 3 from combo allow-lists. This preserves existing layer references and right-hand access while preventing higher overlays from re-enabling left-side typing chords or desktop modifiers during gaming.
 - Keep the complete source-defined behavior as the first reversible Studio experiment. Do not substitute stock vendor firmware while silently losing combos or tap-hold tuning. The full vendor trackball UI remains a separate migration target.
 - Pin the supported release pair rather than rebuild the old moving-`main` manifest. A new build is a port, not a reproduction of the April binary.
 - Use the actual chosen 64-position layout and preserve binding order; do not use the stale 82-position editor JSON as the hardware definition.

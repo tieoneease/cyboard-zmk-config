@@ -2,6 +2,8 @@
 
 This is the source-managed workflow for `tieoneease/cyboard-zmk-config`. It reuses **ZMK Keymap Editor**, the existing **GitHub Actions firmware build**, and a small **local UF2 workbench**. It does not substitute Cyboard's stock firmware or attempt to recreate its private Studio extensions.
 
+**Current delivery:** the owner uses successful `main` firmware builds and manually flashes the downloaded left/right UF2 files. The optional workbench/editor setup below still targets `migration/studio-preserve-current`; it is not the delivery path for newer `main`-only changes. Match every download to the intended source commit.
+
 The source configuration remains in `config/imprint.keymap`. Original layers 0–6, four combos, custom hold-tap timing, Windows shortcuts, and the right-trackball source rules are retained outside game mode. An eighth automatic layer protects the left side while the existing game toggle is active; see [Game mode](#game-mode). Physical equivalence of the new firmware is still a hardware-validation task.
 
 ## One-time setup
@@ -46,7 +48,7 @@ gh auth status
 npm run companion
 ```
 
-Complete `gh auth login` yourself if necessary. This fallback delegates authentication to `gh`, rather than using the desktop token form. Open **http://127.0.0.1:4765** or the printed address. `scripts/start-companion.cmd` (Windows) and `sh scripts/start-companion.sh` (macOS/Linux) also launch it. Keep using `127.0.0.1`, not a reverse proxy or tunnel. `main` is deliberately unchanged.
+Complete `gh auth login` yourself if necessary. This fallback delegates authentication to `gh`, rather than using the desktop token form. Open **http://127.0.0.1:4765** or the printed address. `scripts/start-companion.cmd` (Windows) and `sh scripts/start-companion.sh` (macOS/Linux) also launch it. Keep using `127.0.0.1`, not a reverse proxy or tunnel. This optional fallback still follows the migration branch rather than the current manual-delivery branch, `main`.
 
 ### 3. Connect the visual editor
 
@@ -58,7 +60,7 @@ Open https://nickcoutsos.github.io/keymap-editor/ in Chrome or Edge.
 4. Confirm the loaded keymap is `config/imprint.keymap` (choose it if prompted). The matching `config/info.json` describes your **64-position number-row layout**.
 5. Confirm eight layers (the original seven plus automatic `game_guard_layer`), the thumb-key order, and the four combos before saving a change. Preserve the conditional rule from layer 3 to layer 7 and the Escape/Tab combo layer restrictions.
 
-The editor's source supports selecting and committing to non-default branches. Its initial default can still be `main`; branch selection matters. The older `main` metadata described 82 positions and is not the intended editor profile.
+The editor's source supports selecting and committing to non-default branches. Its initial default can still be `main`; branch selection matters. Before the migration was merged, `main` had stale 82-position metadata; current `main` has the corrected 64-position profile too.
 
 The isolated pre-setup browser check loaded a copy of this keymap and metadata and confirmed seven layers, 64 positions, four combos, and editable `tap-preferred` / 175 ms / 150 ms Mod-Tap settings. A temporary timing edit and restore left the right-trackball source expressions present. This was not a new compile or a complete round-trip proof.
 
@@ -135,7 +137,8 @@ After an installation changes a half's current image, explicitly replace that ha
 
 Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatically enables the highest-priority protection layer 7; do not activate layer 7 directly.
 
-- **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, both Windows/Alt key pairs, and non-gaming actions from higher layers.
+- **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, Windows/Alt modifier outputs, and non-gaming actions from higher layers.
+- **Game-bindable key:** both left Windows-key positions send plain **F8** while gaming, even with other layers held. Outside game mode they keep their normal Windows bindings. Both left Alt keys remain blocked while gaming.
 - **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift, thumb Space, and the same game toggle to exit.
 - **Right side:** bindings, Backspace/Enter chords, mouse controls, and layer access remain unchanged. Holding a right-hand layer key does not remove left-side protection.
 - **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
@@ -144,13 +147,18 @@ The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes 
 
 These are source changes, not live Studio edits. They need a successful firmware build and an explicitly approved installation before the keyboard changes. Existing saved Studio key bindings can override compiled bindings; check them if the flashed behavior differs. Do not use a settings-reset image casually.
 
+## Arrow keys below comma and period
+
+The two keys directly below **`,`** and **`.`** (source positions 50/51, previously the base-layer brackets) send **Left** and **Right**, respectively. Whenever layer 1 is active, they instead send **Down** and **Up**. All higher layers, including the game guard, remain transparent at these positions so the rule holds across layer combinations. MO1 remains a hold-layer key; this does not add a layer-1 toggle or change its game-mode Space behavior. Brackets remain available on layer 1 in their other existing positions.
+
 ## Hardware acceptance checklist
 
 Before accepting the new firmware, verify:
 
 - All grid and thumb positions and original layer transitions; game protection layer 7 automatically follows TG3.
 - All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, even while MO2/MO5 are held; right-hand Backspace/Enter combos still work.
-- Game mode blocks both left GUI/Alt pairs, keeps Ctrl/Shift/Space available, prevents higher-layer left shortcuts, and exits using the same thumb toggle.
+- Game mode makes both left Windows positions send F8, blocks both left Alt keys, keeps Ctrl/Shift/Space available, prevents higher-layer left shortcuts, and exits using the same thumb toggle.
+- The keys below comma/period send Left/Right across all layers, changing to Down/Up whenever layer 1 is active, including with higher overlays held.
 - Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.
 - Ctrl/A, Ctrl/semicolon, Shift/Z, and right-Shift/slash Mod-Taps and typing feel.
 - Windows Right-Alt-number, Alt-P/N, and shifted Alt-P/N shortcuts.

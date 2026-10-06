@@ -61,9 +61,9 @@ const expectedLeft = new Map([
   [12, '&kp TAB'], [13, '&kp Q'], [14, '&kp W'], [15, '&kp E'], [16, '&kp R'], [17, '&kp T'],
   [24, '&kp LCTRL'], [25, '&kp A'], [26, '&kp S'], [27, '&kp D'], [28, '&kp F'], [29, '&kp G'],
   [36, '&kp LSHFT'], [37, '&kp Z'], [38, '&kp X'], [39, '&kp C'], [40, '&kp V'], [41, '&kp B'],
-  [48, '&none'], [49, '&none'],
+  [48, '&kp F8'], [49, '&none'],
   [52, '&tog 3'], [53, '&none'], [54, '&none'],
-  [58, '&none'], [59, '&none'], [60, '&kp SPACE'],
+  [58, '&kp F8'], [59, '&none'], [60, '&kp SPACE'],
 ]);
 
 test('game protection appends one 64-position layer without renumbering existing layers', () => {
@@ -94,7 +94,7 @@ test('Escape and Tab chords remain available off and are excluded throughout gam
   }
 });
 
-test('left game keys stay plain, GUI/Alt stay blocked, and TG3 remains reachable under every overlay', () => {
+test('left game keys stay plain, Windows keys send F8, Alt stays blocked, and TG3 remains reachable under every overlay', () => {
   assert.deepEqual([...expectedLeft.keys()], left);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);
@@ -113,6 +113,28 @@ test('turning TG3 off removes protection and restores normal left typing/modifie
     [48, '&kp LGUI'], [49, '&kp LALT'], [58, '&kp LGUI'], [59, '&kp LALT'],
     [52, '&tog 3'], [60, '&mo 1'],
   ]) assert.equal(bindingAt(position, active), binding, `position ${position}`);
+});
+
+test('keys below comma and period are Left/Right, or Down/Up whenever layer 1 is active', () => {
+  for (const [above, below] of [[44, 50], [45, 51]]) {
+    assert.equal(layout[below].col, layout[above].col);
+    assert.equal(layout[below].row, layout[above].row + 1);
+  }
+  assert.equal(layers[0].bindings[44], '&kp COMMA');
+  assert.equal(layers[0].bindings[45], '&kp DOT');
+  assert.deepEqual(layers[0].bindings.slice(50, 52), ['&kp LEFT', '&kp RIGHT']);
+  assert.deepEqual(layers[1].bindings.slice(50, 52), ['&kp DOWN', '&kp UP']);
+  for (const layer of layers.slice(2)) {
+    assert.deepEqual(layer.bindings.slice(50, 52), ['&trans', '&trans'], layer.name);
+  }
+  for (const overlays of overlayStates) {
+    const expected = overlays.includes(1) ? ['&kp DOWN', '&kp UP'] : ['&kp LEFT', '&kp RIGHT'];
+    for (const game of [false, true]) {
+      const active = activeLayers(game ? [3, ...overlays] : overlays);
+      assert.deepEqual([50, 51].map(position => bindingAt(position, active)), expected,
+        `game ${game}, overlays ${overlays}`);
+    }
+  }
 });
 
 test('global Studio unlock chord is disabled while explicit layer-6 unlock keys remain', () => {

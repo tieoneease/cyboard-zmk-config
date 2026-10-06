@@ -2,7 +2,7 @@
 
 ## Objective and baseline
 
-Use visual source editing, the fork's existing GitHub builds, and a local guarded UF2 installer without silently replacing the custom keyboard configuration. See [WORKFLOW.md](WORKFLOW.md) for setup, daily use, and recovery boundaries.
+Keep the custom keyboard configuration in source and use the fork's GitHub builds. The owner now requests delivery through `main` with downloaded per-half UF2 files for manual flashing. The optional guarded workbench remains configured for `migration/studio-preserve-current`; it has not been retargeted to `main`. See [WORKFLOW.md](WORKFLOW.md) for setup, daily use, and recovery boundaries.
 
 The earlier migration enabled standard live Studio key editing while preserving the source definitions. It remains a source-preserving self-build, **not** Cyboard's full vendor firmware with its runtime trackball configurator. The source-managed workflow is now the primary route; live Studio settings are not synchronized into Git.
 
@@ -17,17 +17,17 @@ The preserved source baseline is `2506fead2aaf7351f0c2e95adb47f6a3624bf274` (202
 - Mouse, RGB, Bluetooth, reset/bootloader and existing Studio-unlock bindings.
 - Exact Right-Alt-number, Alt-P/N and shifted Alt-P/N outputs used by the Windows desktop setup. No host remapping is added.
 
-The original Studio migration changed only the chosen layout declaration in `config/imprint.keymap`. The subsequent game-mode change intentionally adds the protection described below.
+The original Studio migration changed only the chosen layout declaration in `config/imprint.keymap`. Subsequent changes intentionally add the game protection below and replace the two bracket keys directly below comma/period (positions 50/51) with Left/Right. Whenever layer 1 is active, those positions send Down/Up instead; all higher layers remain transparent there. The layer-1 bracket bindings remain available at their existing positions.
 
 ### Game toggle
 
-The existing `&tog 3` left-thumb key still enters and exits game mode. While layer 3 is active, a conditional layer 7 takes precedence over all existing layers on the left: plain letters/numbers, dedicated Ctrl/Shift/Escape/Tab, and thumb Space remain; both left GUI/Alt pairs and unused thumb keys are blocked with `&none`. This also prevents left-hand desktop shortcuts, media controls, and keyboard-control actions from leaking through while a right-hand layer key is held. Right-hand bindings stay transparent, including its two combos and layer/trackball controls. Toggle game mode off before using left-hand non-gaming layers.
+The existing `&tog 3` left-thumb key still enters and exits game mode. While layer 3 is active, a conditional layer 7 takes precedence over all existing layers on the left: plain letters/numbers, dedicated Ctrl/Shift/Escape/Tab, and thumb Space remain; both left Windows-key positions send plain F8 for game binding, while both left Alt keys and unused thumb keys are blocked with `&none`. This also prevents left-hand desktop shortcuts, media controls, and keyboard-control actions from leaking through while a right-hand layer key is held. Right-hand bindings stay transparent, including its two combos and layer/trackball controls. Toggle game mode off before using left-hand non-gaming layers.
 
 Escape/Tab combos allow only layers `0 1 2 4 5 6`. [ZMK v0.3.0 filters combos by the highest active layer](https://github.com/zmkfirmware/zmk/blob/v0.3.0/app/src/combo.c), not by whether layer 3 is somewhere in the stack. The automatic layer 7 therefore keeps the exclusion effective even with higher non-gaming layers held, without renumbering saved layer references. Do not toggle layer 7 directly. Release held keys before switching modes; this is not a cancellation mechanism for an already-pressed modifier or an in-flight combo.
 
 The separate Cyboard A+F 3-second Studio-unlock chord is disabled globally with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n` in `config/imprint.conf`, as approved by the owner. Its pinned listener has no layer filter, so the game guard alone cannot block it. The module's [Kconfig](https://github.com/Cyboard-DigitalTailor/zmk-keyboards/blob/5a0552e9ddc2df919ec491e89102625a1e39324e/Kconfig) and [CMake gate](https://github.com/Cyboard-DigitalTailor/zmk-keyboards/blob/5a0552e9ddc2df919ec491e89102625a1e39324e/CMakeLists.txt) make this independent of Studio locking and the explicit layer-6 unlock bindings, which remain available.
 
-`npm run test:game` checks the source configuration, all 32 combinations of other layers with game mode on/off, left-side protection, and right-side transparency. It is also included in `npm test`; it does not run firmware or establish physical timing. Firmware compilation and keyboard acceptance remain required before installation.
+`npm run test:game` checks the source configuration, all 32 combinations of other layers with game mode on/off, left-side protection/F8 substitution, right-side transparency, and the arrow pair's layer-1 override. It is also included in `npm test`; it does not run firmware or establish physical timing. Firmware compilation and keyboard acceptance remain required before installation.
 
 ## Build and checks
 

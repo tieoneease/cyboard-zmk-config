@@ -57,7 +57,7 @@
 &kp TAB    &kp Q         &kp W   &kp E   &kp R   &kp T               &kp Y   &kp U     &kp I      &kp O    &kp P           &kp BSPC
 &kp LCTRL  &mt LCTRL A   &kp S   &kp D   &kp F   &kp G               &kp H   &kp J     &kp K      &kp L    &mt LCTRL SEMI  &kp SQT
 &kp LSHFT  &mt LSHFT Z   &kp X   &kp C   &kp V   &kp B               &kp N   &kp M     &kp COMMA  &kp DOT  &mt RSHFT FSLH  &kp ENTER
-           &kp LGUI  &kp LALT                                                            &kp LBKT  &kp RBKT
+           &kp LGUI  &kp LALT                                                            &kp LEFT  &kp RIGHT
                                   &tog 3  &trans  &trans   &mkp LCLK  &mkp MCLK  &mkp RCLK
                                   &kp LGUI  &kp LALT  &mo 1   &kp SPACE  &mo 2  &mo 5
             >;
@@ -70,7 +70,7 @@
 &trans   &trans   &kp N7      &kp N8      &kp N9   &trans              &trans   &kp MINUS   &kp EQUAL  &kp GRAVE  &kp F12  &kp DEL
 &trans   &trans   &kp N4      &kp N5      &kp N6   &trans              &trans   &kp LBKT    &kp RBKT   &kp BSLH   &kp SQT  &trans
 &trans   &trans   &kp N1      &kp N2      &kp N3   &kp N0              &trans   &kp LS(N9)  &kp LS(N0) &trans     &trans   &trans
-         &trans   &trans                                                                      &trans     &trans
+         &trans   &trans                                                                      &kp DOWN   &kp UP
                                     &trans  &trans  &trans   &kp UP    &kp DOWN  &trans
                                     &trans  &trans  &trans   &mo 4     &trans    &trans
             >;
@@ -150,9 +150,9 @@
 &kp TAB    &kp Q   &kp W   &kp E   &kp R   &kp T               &trans  &trans  &trans  &trans  &trans  &trans
 &kp LCTRL  &kp A   &kp S   &kp D   &kp F   &kp G               &trans  &trans  &trans  &trans  &trans  &trans
 &kp LSHFT  &kp Z   &kp X   &kp C   &kp V   &kp B               &trans  &trans  &trans  &trans  &trans  &trans
-           &none  &none                                                          &trans  &trans
+           &kp F8  &none                                                         &trans  &trans
                                 &tog 3  &none  &none   &trans  &trans  &trans
-                                &none   &none  &kp SPACE   &trans  &trans  &trans
+                                &kp F8  &none  &kp SPACE   &trans  &trans  &trans
             >;
         };
     };

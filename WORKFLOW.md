@@ -144,13 +144,23 @@ Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatical
 - **Right-thumb scrolling and mouse button:** MO2 (position 62) remains a momentary layer-2 hold in both modes. Hold it to make the right trackball scroll with 1/3 scaling and inverted vertical scrolling; release it to return to cursor movement. MO5 immediately to its right (position 63) sends **Mouse 5** with ordinary press/hold/release behavior while gaming, including while MO2 is held. Toggle game mode off to restore MO5 media-layer access. Other right-side bindings, existing mouse buttons, and Backspace/Enter chords remain unchanged. Other active layers do not remove the protection or the Mouse 5 override.
 - **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
 
-The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n`. Studio still requires unlocking: with game mode off, hold MO5, hold the left pinky's layer-6 key, then press either explicit Studio-unlock key (the T/Y positions). This preserves access without a global gaming chord.
+The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n`. Studio still requires unlocking: with game mode off, hold Media/MO5 first, then hold the MO1 thumb, then press either explicit Studio-unlock key (the T/Y positions). This preserves access without a global gaming chord.
 
 These are source changes, not live Studio edits. They need a successful firmware build and an explicitly approved installation before the keyboard changes. Existing saved Studio key bindings can override compiled bindings; check them if the flashed behavior differs. Do not use a settings-reset image casually.
 
 ## Arrow keys below comma and period
 
 The two keys directly below **`,`** and **`.`** (source positions 50/51, previously the base-layer brackets) send **Left** and **Right**, respectively. Whenever layer 1 is active, they instead send **Down** and **Up**. All higher layers, including the game guard, remain transparent at these positions so the rule holds across layer combinations. MO1 remains a hold-layer key; this does not add a layer-1 toggle or change its game-mode Space behavior. Brackets remain available on layer 1 in their other existing positions.
+
+## Keyboard-control layer
+
+Hold **Media/MO5 first**, then press and hold the **MO1 thumb** to enter keyboard-control layer 6. This is order-sensitive: MO1 first activates Numbers and adding Media does not retroactively turn it into Control. Release and re-press MO1 while Media is held to enter Control. Releasing MO1 exits Control; if Media is released first, Control remains active until MO1 is released. The bottom-finger Alt key under C is now ordinary Alt on Media.
+
+The existing layer-6 hardware controls are unchanged: number keys 1–5 select Bluetooth profiles 0–4; Esc clears the selected pairing; U/J, I/K, O/L and P/semicolon adjust RGB hue, saturation, brightness and speed respectively; T/Y unlock Studio; Tab/Backspace reset the corresponding half; dedicated Ctrl/quote enter its bootloader; Shift/Enter switch to game layer 3. There is no explicit USB-output, RGB-toggle, RGB-effect-cycle or RGB-status binding in this Imprint keymap.
+
+## Media mute toggle
+
+With game mode off, hold the right **Media / MO5** thumb and press the **dedicated left Ctrl key** (left of A) to send the standard consumer audio-mute toggle. Press it again while holding Media to unmute. This is speaker/output mute, not microphone mute; it does not change the Ctrl/A mod-tap. Without Media, Ctrl remains Ctrl. Game protection keeps dedicated Ctrl as Ctrl and MO5 as Mouse 5. The separate keyboard-control layer still uses the dedicated Ctrl position for bootloader access.
 
 ## Hardware acceptance checklist
 
@@ -162,6 +172,8 @@ Before accepting the new firmware, verify:
 - In game mode, hold MO2 and confirm the right trackball scrolls, then release MO2 and confirm cursor movement returns. MO5 sends Mouse 5 (press/hold/release), including while MO2 is held, and does not activate layer 5. Toggle game mode off and confirm MO5 media-layer access returns and MO2 still works. Release held keys before changing modes.
 - The keys below comma/period send Left/Right across all layers, changing to Down/Up whenever layer 1 is active, including with higher overlays held.
 - Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.
+- With game mode off, Media then MO1 enters keyboard control; the reverse order does not. Check both release orders leave no stuck layer after both keys are released, and that Alt no longer activates Control.
+- With game mode off, hold MO5 and press dedicated Ctrl: output audio mutes; a second press unmutes. Release MO5 and verify normal Ctrl. Game-mode Ctrl must not mute audio.
 - Ctrl/A, Ctrl/semicolon, Shift/Z, and right-Shift/slash Mod-Taps and typing feel.
 - Windows Right-Alt-number, Alt-P/N, and shifted Alt-P/N shortcuts.
 - Right trackball: cursor mode normally, scrolling on layer 2, intended speed and scroll direction, unchanged cursor direction.

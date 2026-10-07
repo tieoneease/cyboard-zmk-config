@@ -115,6 +115,24 @@ test('turning TG3 off removes protection and restores normal left typing/modifie
   ]) assert.equal(bindingAt(position, active), binding, `position ${position}`);
 });
 
+test('Media plus dedicated Ctrl toggles audio mute without changing base Ctrl or game protection', () => {
+  assert.equal(layers[0].bindings[24], '&kp LCTRL');
+  assert.equal(layers[5].bindings[24], '&kp C_MUTE');
+  assert.deepEqual(layers[5].bindings.slice(25, 29), [
+    '&kp C_VOL_DN', '&kp C_VOL_UP', '&kp C_BRI_DN', '&kp C_BRI_UP',
+  ]);
+  for (const overlays of overlayStates) {
+    if (!overlays.includes(6)) {
+      const expected = overlays.includes(5) ? '&kp C_MUTE' : '&kp LCTRL';
+      assert.equal(bindingAt(24, activeLayers(overlays)), expected, `overlays ${overlays}`);
+    }
+    assert.equal(bindingAt(24, activeLayers([3, ...overlays])), '&kp LCTRL',
+      `game on, overlays ${overlays}`);
+  }
+  // The separately accessed keyboard-control layer keeps its existing bootloader key.
+  assert.equal(bindingAt(24, activeLayers([5, 6])), '&bootloader');
+});
+
 test('keys below comma and period are Left/Right, or Down/Up whenever layer 1 is active', () => {
   for (const [above, below] of [[44, 50], [45, 51]]) {
     assert.equal(layout[below].col, layout[above].col);
@@ -137,6 +155,56 @@ test('keys below comma and period are Left/Right, or Down/Up whenever layer 1 is
   }
 });
 
+test('Control access is Media then MO1, never the reverse order or Alt', () => {
+  assert.equal(layers[5].bindings[60], '&mo 6');
+  assert.equal(layers[5].bindings[49], '&trans');
+  assert.equal(bindingAt(49, activeLayers([5])), '&kp LALT');
+  // Model ZMK's press-time layer selection and matching release, not firmware execution.
+  // https://github.com/zmkfirmware/zmk/blob/v0.3.0/app/src/keymap.c
+  function sequence(initial = []) {
+    const enabled = new Set(initial);
+    const held = new Map();
+    return {
+      active: () => activeLayers([...enabled]),
+      press(position) {
+        const binding = bindingAt(position, activeLayers([...enabled]));
+        held.set(position, binding);
+        if (binding.startsWith('&mo ')) enabled.add(Number(binding.split(' ')[1]));
+        return binding;
+      },
+      release(position) {
+        const binding = held.get(position);
+        assert.ok(binding, `position ${position} must be held`);
+        if (binding.startsWith('&mo ')) enabled.delete(Number(binding.split(' ')[1]));
+        held.delete(position);
+      },
+    };
+  }
+  for (const releaseOrder of [[60, 63], [63, 60]]) {
+    const state = sequence();
+    assert.equal(state.press(63), '&mo 5');
+    assert.equal(state.press(60), '&mo 6');
+    assert.deepEqual(state.active(), [6, 5, 0]);
+    state.release(releaseOrder[0]);
+    assert.deepEqual(state.active(), releaseOrder[0] === 60 ? [5, 0] : [6, 0]);
+    state.release(releaseOrder[1]);
+    assert.deepEqual(state.active(), [0]);
+  }
+  const reverse = sequence();
+  assert.equal(reverse.press(60), '&mo 1');
+  assert.equal(reverse.press(63), '&mo 5');
+  assert.deepEqual(reverse.active(), [5, 1, 0]);
+  reverse.release(60);
+  assert.equal(reverse.press(60), '&mo 6');
+  reverse.release(60);
+  reverse.release(63);
+  assert.deepEqual(reverse.active(), [0]);
+  const game = sequence([3]);
+  assert.equal(game.press(63), '&mkp MB5');
+  assert.equal(game.press(60), '&kp SPACE');
+  assert.deepEqual(game.active(), [7, 3, 0]);
+});
+
 test('global Studio unlock chord is disabled while explicit layer-6 unlock keys remain', () => {
   const config = readFileSync(new URL('../config/imprint.conf', import.meta.url), 'utf8');
   const settings = config.split(/\r?\n/).filter((line) => /^CONFIG_ZMK_STUDIO_UNLOCK_COMBO=/.test(line));
@@ -144,7 +212,7 @@ test('global Studio unlock chord is disabled while explicit layer-6 unlock keys 
   assert.doesNotMatch(config, /^CONFIG_ZMK_STUDIO(?:_LOCKING)?=n\s*$/m);
   assert.equal(layers[6].bindings[17], '&studio_unlock');
   assert.equal(layers[6].bindings[18], '&studio_unlock');
-  assert.equal(bindingAt(49, activeLayers([5])), '&mo 6');
+  assert.equal(bindingAt(60, activeLayers([5])), '&mo 6');
   assert.equal(bindingAt(17, activeLayers([5, 6])), '&studio_unlock');
 });
 

@@ -115,20 +115,21 @@
             >;
         };
 
-        // Layer 5 — media controls (hold MO5); LALT+pinky accesses keyboard_control
+        // Layer 5 — media controls (hold MO5); dedicated Ctrl toggles audio mute.
+        // Press MO1 after Media to access keyboard_control (order-sensitive).
         layer_5 {
             bindings = <
 &trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_BRI_DN  &kp C_BRI_UP  &to 3              &trans  &trans  &trans  &trans  &trans  &trans
+&kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_BRI_DN  &kp C_BRI_UP  &to 3              &trans  &trans  &trans  &trans  &trans  &trans
 &trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
-        &trans  &mo 6                                                                &trans  &trans
+        &trans  &trans                                                               &trans  &trans
                                 &trans  &trans  &trans   &trans  &trans  &trans
-                                &trans  &trans  &trans   &trans  &trans  &trans
+                                &trans  &trans  &mo 6    &trans  &trans  &trans
             >;
         };
 
-        // Layer 6 — keyboard control: BT, RGB, reset (hold MO6 from layer 5 pinky)
+        // Layer 6 — keyboard control: BT, RGB, reset (Media first, then MO1)
         keyboard_control {
             bindings = <
 &bt BT_CLR   &bt BT_SEL 0  &bt BT_SEL 1  &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4            &trans          &trans           &trans           &trans           &trans           &trans

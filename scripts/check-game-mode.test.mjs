@@ -148,7 +148,7 @@ test('global Studio unlock chord is disabled while explicit layer-6 unlock keys 
   assert.equal(bindingAt(17, activeLayers([5, 6])), '&studio_unlock');
 });
 
-test('right MO2/MO5 thumbs send mouse 4/5 only in game mode, across every overlay', () => {
+test('right MO2 stays a layer hold and MO5 sends mouse 5 only in game mode, across every overlay', () => {
   assert.equal(layout[62].row, 7);
   assert.equal(layout[62].col, 9);
   assert.equal(layout[63].row, layout[62].row);
@@ -157,19 +157,26 @@ test('right MO2/MO5 thumbs send mouse 4/5 only in game mode, across every overla
   for (const layer of layers.slice(1, 7)) {
     assert.deepEqual(layer.bindings.slice(62, 64), ['&trans', '&trans'], layer.name);
   }
-  assert.deepEqual(layers[7].bindings.slice(62, 64), ['&mkp MB4', '&mkp MB5']);
+  assert.deepEqual(layers[7].bindings.slice(62, 64), ['&trans', '&mkp MB5']);
   for (const overlays of overlayStates) {
     const on = activeLayers([3, ...overlays]);
     const off = activeLayers(overlays);
-    assert.deepEqual([62, 63].map(position => bindingAt(position, on)), ['&mkp MB4', '&mkp MB5'],
+    assert.deepEqual([62, 63].map(position => bindingAt(position, on)), ['&mo 2', '&mkp MB5'],
       `game on, overlays ${overlays}`);
     assert.deepEqual([62, 63].map(position => bindingAt(position, off)), ['&mo 2', '&mo 5'],
       `game off, overlays ${overlays}`);
   }
 });
 
+test('MO2 retains right-trackball scroll mapping, scaling, and vertical inversion', () => {
+  assert.match(source, /&trackball_peripheral_listener\s*\{\s*scroll_mode\s*\{/);
+  const scroll = node('scroll_mode');
+  assert.deepEqual(cells(scroll, 'layers'), [2]);
+  assert.match(scroll, /input-processors\s*=\s*<&zip_xy_scaler 1 3>,\s*<&zip_xy_to_scroll_mapper>,\s*<&zip_scroll_transform INPUT_TRANSFORM_Y_INVERT>;/);
+});
+
 test('other right-hand bindings and global Backspace/Enter chords are not masked by the guard', () => {
-  const unchangedRight = right.filter(position => position !== 62 && position !== 63);
+  const unchangedRight = right.filter(position => position !== 63);
   for (const position of unchangedRight) assert.equal(layers.at(-1).bindings[position], '&trans', `position ${position}`);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);

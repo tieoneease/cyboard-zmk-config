@@ -150,9 +150,9 @@
 &kp TAB    &kp Q   &kp W   &kp E   &kp R   &kp T               &trans  &trans  &trans  &trans  &trans  &trans
 &kp LCTRL  &kp A   &kp S   &kp D   &kp F   &kp G               &trans  &trans  &trans  &trans  &trans  &trans
 &kp LSHFT  &kp Z   &kp X   &kp C   &kp V   &kp B               &trans  &trans  &trans  &trans  &trans  &trans
-           &kp F8  &none                                                         &trans  &trans
+           &kp F8  &kp LALT                                                      &trans  &trans
                                 &tog 3  &none  &none   &trans  &trans  &trans
-                                &kp F8  &none  &kp SPACE   &trans  &trans  &mkp MB5
+                                &kp F8  &kp LALT  &kp SPACE   &trans  &trans  &mkp MB5
             >;
         };
     };

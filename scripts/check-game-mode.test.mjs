@@ -61,9 +61,9 @@ const expectedLeft = new Map([
   [12, '&kp TAB'], [13, '&kp Q'], [14, '&kp W'], [15, '&kp E'], [16, '&kp R'], [17, '&kp T'],
   [24, '&kp LCTRL'], [25, '&kp A'], [26, '&kp S'], [27, '&kp D'], [28, '&kp F'], [29, '&kp G'],
   [36, '&kp LSHFT'], [37, '&kp Z'], [38, '&kp X'], [39, '&kp C'], [40, '&kp V'], [41, '&kp B'],
-  [48, '&kp F8'], [49, '&none'],
+  [48, '&kp F8'], [49, '&kp LALT'],
   [52, '&tog 3'], [53, '&none'], [54, '&none'],
-  [58, '&kp F8'], [59, '&none'], [60, '&kp SPACE'],
+  [58, '&kp F8'], [59, '&kp LALT'], [60, '&kp SPACE'],
 ]);
 
 test('game protection appends one 64-position layer without renumbering existing layers', () => {
@@ -94,7 +94,7 @@ test('Escape and Tab chords remain available off and are excluded throughout gam
   }
 });
 
-test('left game keys stay plain, Windows keys send F8, Alt stays blocked, and TG3 remains reachable under every overlay', () => {
+test('left game keys stay plain, Windows keys send F8, Alt stays Left Alt, and TG3 remains reachable under every overlay', () => {
   assert.deepEqual([...expectedLeft.keys()], left);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);

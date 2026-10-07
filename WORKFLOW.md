@@ -137,9 +137,10 @@ After an installation changes a half's current image, explicitly replace that ha
 
 Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatically enables the highest-priority protection layer 7; do not activate layer 7 directly.
 
-- **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, Windows/Alt modifier outputs, and non-gaming actions from higher layers.
-- **Game-bindable key:** both left Windows-key positions send plain **F8** while gaming, even with other layers held. Outside game mode they keep their normal Windows bindings. Both left Alt keys remain blocked while gaming.
-- **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift, thumb Space, and the same game toggle to exit.
+- **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, Windows modifier outputs, and non-gaming actions from higher layers.
+- **Game-bindable key:** both left Windows-key positions send plain **F8** while gaming, even with other layers held. Outside game mode they keep their normal Windows bindings.
+- **Left Alt:** both left Alt positions send normal **Left Alt** while gaming, even with other layers held. Alt+Tab and other intentional Alt shortcuts work; the W+E and S+D typing combos remain disabled. Normal Alt also enables the host's configured Alt-based desktop shortcuts. On Windows, the current whkd configuration uses Alt+Esc to pause/resume those shortcuts for gaming; native Alt+Tab remains available.
+- **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift/Alt, thumb Space, and the same game toggle to exit.
 - **Right-thumb scrolling and mouse button:** MO2 (position 62) remains a momentary layer-2 hold in both modes. Hold it to make the right trackball scroll with 1/3 scaling and inverted vertical scrolling; release it to return to cursor movement. MO5 immediately to its right (position 63) sends **Mouse 5** with ordinary press/hold/release behavior while gaming, including while MO2 is held. Toggle game mode off to restore MO5 media-layer access. Other right-side bindings, existing mouse buttons, and Backspace/Enter chords remain unchanged. Other active layers do not remove the protection or the Mouse 5 override.
 - **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
 
@@ -157,7 +158,7 @@ Before accepting the new firmware, verify:
 
 - All grid and thumb positions and original layer transitions; game protection layer 7 automatically follows TG3.
 - All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, including when another layer was held before entering game mode; right-hand Backspace/Enter combos still work.
-- Game mode makes both left Windows positions send F8, blocks both left Alt keys, keeps Ctrl/Shift/Space available, prevents higher-layer left shortcuts, and exits using the same thumb toggle.
+- Game mode makes both left Windows positions send F8, keeps both left Alt positions as Left Alt (including Alt+Tab), keeps Ctrl/Shift/Space available, blocks higher-layer left shortcut macros, and exits using the same thumb toggle. Confirm Alt and F8 remain available while MO2 is held, without re-enabling the W+E/S+D typing combos.
 - In game mode, hold MO2 and confirm the right trackball scrolls, then release MO2 and confirm cursor movement returns. MO5 sends Mouse 5 (press/hold/release), including while MO2 is held, and does not activate layer 5. Toggle game mode off and confirm MO5 media-layer access returns and MO2 still works. Release held keys before changing modes.
 - The keys below comma/period send Left/Right across all layers, changing to Down/Up whenever layer 1 is active, including with higher overlays held.
 - Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.

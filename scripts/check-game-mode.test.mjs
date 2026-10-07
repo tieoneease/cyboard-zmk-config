@@ -148,11 +148,32 @@ test('global Studio unlock chord is disabled while explicit layer-6 unlock keys 
   assert.equal(bindingAt(17, activeLayers([5, 6])), '&studio_unlock');
 });
 
-test('right-hand bindings and global Backspace/Enter chords are not masked by the guard', () => {
-  for (const position of right) assert.equal(layers.at(-1).bindings[position], '&trans', `position ${position}`);
+test('right MO2/MO5 thumbs send mouse 4/5 only in game mode, across every overlay', () => {
+  assert.equal(layout[62].row, 7);
+  assert.equal(layout[62].col, 9);
+  assert.equal(layout[63].row, layout[62].row);
+  assert.equal(layout[63].col, layout[62].col + 1);
+  assert.deepEqual(layers[0].bindings.slice(62, 64), ['&mo 2', '&mo 5']);
+  for (const layer of layers.slice(1, 7)) {
+    assert.deepEqual(layer.bindings.slice(62, 64), ['&trans', '&trans'], layer.name);
+  }
+  assert.deepEqual(layers[7].bindings.slice(62, 64), ['&mkp MB4', '&mkp MB5']);
+  for (const overlays of overlayStates) {
+    const on = activeLayers([3, ...overlays]);
+    const off = activeLayers(overlays);
+    assert.deepEqual([62, 63].map(position => bindingAt(position, on)), ['&mkp MB4', '&mkp MB5'],
+      `game on, overlays ${overlays}`);
+    assert.deepEqual([62, 63].map(position => bindingAt(position, off)), ['&mo 2', '&mo 5'],
+      `game off, overlays ${overlays}`);
+  }
+});
+
+test('other right-hand bindings and global Backspace/Enter chords are not masked by the guard', () => {
+  const unchangedRight = right.filter(position => position !== 62 && position !== 63);
+  for (const position of unchangedRight) assert.equal(layers.at(-1).bindings[position], '&trans', `position ${position}`);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);
-    for (const position of right) {
+    for (const position of unchangedRight) {
       assert.equal(bindingAt(position, active), bindingAt(position, active.filter((layer) => layer !== 7)));
     }
   }

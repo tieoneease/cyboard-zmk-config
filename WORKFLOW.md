@@ -140,7 +140,7 @@ Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatical
 - **Disabled on the left:** W+E → Escape, S+D → Tab, A/Ctrl and Z/Shift mod-taps, Windows/Alt modifier outputs, and non-gaming actions from higher layers.
 - **Game-bindable key:** both left Windows-key positions send plain **F8** while gaming, even with other layers held. Outside game mode they keep their normal Windows bindings. Both left Alt keys remain blocked while gaming.
 - **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift, thumb Space, and the same game toggle to exit.
-- **Right side:** bindings, Backspace/Enter chords, mouse controls, and layer access remain unchanged. Holding a right-hand layer key does not remove left-side protection.
+- **Right-thumb mouse buttons:** MO2 (position 62) sends **Mouse 4**; MO5 immediately to its right (position 63) sends **Mouse 5**. They act as ordinary press/hold/release mouse buttons, not layer keys, while gaming. Toggle game mode off to restore MO2 trackball scrolling and MO5 media-layer access. Other right-side bindings, existing mouse buttons, and Backspace/Enter chords remain unchanged. Overlays held before entering game mode do not remove the protection or these mouse-button overrides.
 - **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
 
 The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n`. Studio still requires unlocking: with game mode off, hold MO5, hold the left pinky's layer-6 key, then press either explicit Studio-unlock key (the T/Y positions). This preserves access without a global gaming chord.
@@ -156,8 +156,9 @@ The two keys directly below **`,`** and **`.`** (source positions 50/51, previou
 Before accepting the new firmware, verify:
 
 - All grid and thumb positions and original layer transitions; game protection layer 7 automatically follows TG3.
-- All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, even while MO2/MO5 are held; right-hand Backspace/Enter combos still work.
+- All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, including when another layer was held before entering game mode; right-hand Backspace/Enter combos still work.
 - Game mode makes both left Windows positions send F8, blocks both left Alt keys, keeps Ctrl/Shift/Space available, prevents higher-layer left shortcuts, and exits using the same thumb toggle.
+- In game mode, the right-thumb MO2/MO5 pair sends Mouse 4/Mouse 5 respectively, including press/hold/release and pressing both together. Neither key activates its normal layer. Toggle game mode off and confirm MO2/MO5 layer access returns. Release held keys before changing modes.
 - The keys below comma/period send Left/Right across all layers, changing to Down/Up whenever layer 1 is active, including with higher overlays held.
 - Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.
 - Ctrl/A, Ctrl/semicolon, Shift/Z, and right-Shift/slash Mod-Taps and typing feel.

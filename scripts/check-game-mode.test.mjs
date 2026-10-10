@@ -69,7 +69,7 @@ const expectedLeft = new Map([
 test('game protection appends one 64-position layer without renumbering existing layers', () => {
   assert.deepEqual(layers.map(({ name }) => name), [
     'default_layer', 'layer_1', 'layer_2', 'game_layer', 'layer_4', 'layer_5', 'keyboard_control',
-    'game_guard_layer',
+    'game_guard_layer', 'game_media_layer',
   ]);
   for (const layer of layers) assert.equal(layer.bindings.length, 64, layer.name);
   assert.equal(left.length, 32);
@@ -133,10 +133,11 @@ test('Media plus dedicated Ctrl toggles audio mute without changing base Ctrl or
   assert.equal(bindingAt(24, activeLayers([5, 6])), '&bootloader');
 });
 
-test('Media plus J/K sends F19/F20 for host playback-device cycling, and nowhere else', () => {
+test('Media plus J/K sends F19/F20 for host playback-device cycling, and only on the two media layers', () => {
   assert.deepEqual(layers[5].bindings.slice(31, 33), ['&kp F19', '&kp F20']);
+  assert.deepEqual(layers[8].bindings.slice(31, 33), ['&kp F19', '&kp F20']);
   assert.ok(right.includes(31) && right.includes(32));
-  for (const layer of [...layers.slice(0, 5), ...layers.slice(6)]) {
+  for (const layer of [...layers.slice(0, 5), ...layers.slice(6, 8)]) {
     for (const position of [31, 32]) {
       assert.notEqual(layer.bindings[position], '&kp F19', `${layer.name} ${position}`);
       assert.notEqual(layer.bindings[position], '&kp F20', `${layer.name} ${position}`);
@@ -222,9 +223,9 @@ test('Control access is Media then MO1, never the reverse order or Alt', () => {
   reverse.release(63);
   assert.deepEqual(reverse.active(), [0]);
   const game = sequence([3]);
-  assert.equal(game.press(63), '&mkp MB5');
+  assert.equal(game.press(63), '&mo 8');
   assert.equal(game.press(60), '&kp SPACE');
-  assert.deepEqual(game.active(), [7, 3, 0]);
+  assert.deepEqual(game.active(), [8, 7, 3, 0]);
 });
 
 test('global Studio unlock chord is disabled while explicit layer-6 unlock keys remain', () => {
@@ -238,20 +239,20 @@ test('global Studio unlock chord is disabled while explicit layer-6 unlock keys 
   assert.equal(bindingAt(17, activeLayers([5, 6])), '&studio_unlock');
 });
 
-test('right MO2 stays a layer hold and MO5 sends mouse 5 only in game mode, across every overlay', () => {
+test('right MO2 stays a layer hold and MO5 holds the game-mode media layer only in game mode, across every overlay', () => {
   assert.equal(layout[62].row, 7);
   assert.equal(layout[62].col, 9);
   assert.equal(layout[63].row, layout[62].row);
   assert.equal(layout[63].col, layout[62].col + 1);
   assert.deepEqual(layers[0].bindings.slice(62, 64), ['&mo 2', '&mo 5']);
-  for (const layer of layers.slice(1, 7)) {
+  for (const layer of [...layers.slice(1, 7), layers[8]]) {
     assert.deepEqual(layer.bindings.slice(62, 64), ['&trans', '&trans'], layer.name);
   }
-  assert.deepEqual(layers[7].bindings.slice(62, 64), ['&trans', '&mkp MB5']);
+  assert.deepEqual(layers[7].bindings.slice(62, 64), ['&trans', '&mo 8']);
   for (const overlays of overlayStates) {
     const on = activeLayers([3, ...overlays]);
     const off = activeLayers(overlays);
-    assert.deepEqual([62, 63].map(position => bindingAt(position, on)), ['&mo 2', '&mkp MB5'],
+    assert.deepEqual([62, 63].map(position => bindingAt(position, on)), ['&mo 2', '&mo 8'],
       `game on, overlays ${overlays}`);
     assert.deepEqual([62, 63].map(position => bindingAt(position, off)), ['&mo 2', '&mo 5'],
       `game off, overlays ${overlays}`);
@@ -286,9 +287,40 @@ test('game mode turns H, J and the right Space thumb into right click, Mouse 5 a
   assert.deepEqual([30, 31].map((position) => bindingAt(position, activeLayers([3, 2]))), ['&mkp RCLK', '&mkp MB5']);
 });
 
+test('holding MO5 in game mode gives the layer-5 media cluster and J/K audio keys without lifting the guard elsewhere', () => {
+  const media = new Map([
+    [24, '&kp C_MUTE'], [25, '&kp C_VOL_DN'], [26, '&kp C_VOL_UP'], [27, '&kp C_BRI_DN'], [28, '&kp C_BRI_UP'],
+    [31, '&kp F19'], [32, '&kp F20'],
+  ]);
+  for (const [position, binding] of media) assert.equal(layers[5].bindings[position], binding, `layer 5 ${position}`);
+  for (let position = 0; position < 64; position++) {
+    assert.equal(layers[8].bindings[position], media.get(position) ?? '&trans', `layer 8 ${position}`);
+  }
+  // Layer 8 is reachable only through the guard's MO5; it never activates from a normal-mode binding.
+  for (const layer of layers.filter((_, index) => index !== 7)) {
+    assert.ok(!layer.bindings.some((binding) => binding === '&mo 8' || binding === '&tog 8' || binding === '&to 8'), layer.name);
+  }
+  for (const overlays of overlayStates) {
+    const held = activeLayers([3, 8, ...overlays]);
+    const released = activeLayers([3, ...overlays]);
+    assert.equal(held[0], 8);
+    for (let position = 0; position < 64; position++) {
+      const expected = media.has(position) ? media.get(position) : bindingAt(position, released);
+      assert.equal(bindingAt(position, held), expected, `position ${position}, overlays ${overlays}`);
+    }
+    // Media held while gaming: letters stay guarded, mouse buttons stay, keyboard control stays blocked.
+    assert.equal(bindingAt(14, held), '&kp W');
+    assert.equal(bindingAt(30, held), '&mkp RCLK');
+    assert.equal(bindingAt(61, held), '&mkp MB4');
+    assert.equal(bindingAt(60, held), '&kp SPACE');
+    assert.equal(bindingAt(29, held), '&kp G');
+    for (const name of ['combo_esc', 'combo_tab']) assert.equal(comboEnabled(name, held), false, name);
+  }
+});
+
 test('other right-hand bindings and global Backspace/Enter chords are not masked by the guard', () => {
   const unchangedRight = right.filter(position => ![30, 31, 61, 63].includes(position));
-  for (const position of unchangedRight) assert.equal(layers.at(-1).bindings[position], '&trans', `position ${position}`);
+  for (const position of unchangedRight) assert.equal(layers[7].bindings[position], '&trans', `position ${position}`);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);
     for (const position of unchangedRight) {

@@ -145,8 +145,8 @@
 
         // Layer 7 — automatic while layer 3 is active; do not toggle directly.
         // Explicit left bindings prevent lower-layer modifiers/macros leaking in.
-        // Right hand: H/J send right click/mouse 5, the right Space thumb sends mouse 4,
-        // and the MO5 thumb sends mouse 5; MO2 stays available for trackball scrolling.
+        // Right hand: H/J send right click/mouse 5 and the right Space thumb sends mouse 4;
+        // MO2 stays available for trackball scrolling and MO5 holds the game-mode media layer.
         game_guard_layer {
             bindings = <
 &kp ESC    &kp N1  &kp N2  &kp N3  &kp N4  &kp N5              &trans     &trans    &trans  &trans  &trans  &trans
@@ -155,7 +155,21 @@
 &kp LSHFT  &kp Z   &kp X   &kp C   &kp V   &kp B               &trans     &trans    &trans  &trans  &trans  &trans
            &kp F8  &kp LALT                                                      &trans  &trans
                                 &tog 3  &none  &none   &trans  &trans  &trans
-                                &kp F8  &kp LALT  &kp SPACE   &mkp MB4  &trans  &mkp MB5
+                                &kp F8  &kp LALT  &kp SPACE   &mkp MB4  &trans  &mo 8
+            >;
+        };
+
+        // Layer 8 — game-mode media (hold MO5 while gaming): the same left media cluster
+        // and J/K audio-output keys as layer 5, above the guard; all else stays game-guarded.
+        game_media_layer {
+            bindings = <
+&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans   &trans   &trans  &trans  &trans
+&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans   &trans   &trans  &trans  &trans
+&kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_BRI_DN  &kp C_BRI_UP  &trans              &trans  &kp F19  &kp F20  &trans  &trans  &trans
+&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans   &trans   &trans  &trans  &trans
+        &trans  &trans                                                               &trans  &trans
+                                &trans  &trans  &trans   &trans  &trans  &trans
+                                &trans  &trans  &trans   &trans  &trans  &trans
             >;
         };
     };

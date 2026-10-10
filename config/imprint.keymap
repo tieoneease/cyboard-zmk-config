@@ -116,12 +116,13 @@
         };
 
         // Layer 5 — media controls (hold MO5); dedicated Ctrl toggles audio mute.
+        // J/K send F19/F20: the host cycles the default playback device down/up.
         // Press MO1 after Media to access keyboard_control (order-sensitive).
         layer_5 {
             bindings = <
-&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
-&kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_BRI_DN  &kp C_BRI_UP  &to 3              &trans  &trans  &trans  &trans  &trans  &trans
+&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans   &trans   &trans  &trans  &trans
+&trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans   &trans   &trans  &trans  &trans
+&kp C_MUTE  &kp C_VOL_DN  &kp C_VOL_UP  &kp C_BRI_DN  &kp C_BRI_UP  &to 3              &trans  &kp F19  &kp F20  &trans  &trans  &trans
 &trans  &trans        &trans        &trans        &trans        &trans              &trans  &trans  &trans  &trans  &trans  &trans
         &trans  &trans                                                               &trans  &trans
                                 &trans  &trans  &trans   &trans  &trans  &trans
@@ -144,16 +145,17 @@
 
         // Layer 7 — automatic while layer 3 is active; do not toggle directly.
         // Explicit left bindings prevent lower-layer modifiers/macros leaking in.
-        // Right MO5 thumb becomes mouse 5; MO2 stays available for trackball scrolling.
+        // Right hand: H/J send right click/mouse 5, the right Space thumb sends mouse 4,
+        // and the MO5 thumb sends mouse 5; MO2 stays available for trackball scrolling.
         game_guard_layer {
             bindings = <
-&kp ESC    &kp N1  &kp N2  &kp N3  &kp N4  &kp N5              &trans  &trans  &trans  &trans  &trans  &trans
-&kp TAB    &kp Q   &kp W   &kp E   &kp R   &kp T               &trans  &trans  &trans  &trans  &trans  &trans
-&kp LCTRL  &kp A   &kp S   &kp D   &kp F   &kp G               &trans  &trans  &trans  &trans  &trans  &trans
-&kp LSHFT  &kp Z   &kp X   &kp C   &kp V   &kp B               &trans  &trans  &trans  &trans  &trans  &trans
+&kp ESC    &kp N1  &kp N2  &kp N3  &kp N4  &kp N5              &trans     &trans    &trans  &trans  &trans  &trans
+&kp TAB    &kp Q   &kp W   &kp E   &kp R   &kp T               &trans     &trans    &trans  &trans  &trans  &trans
+&kp LCTRL  &kp A   &kp S   &kp D   &kp F   &kp G               &mkp RCLK  &mkp MB5  &trans  &trans  &trans  &trans
+&kp LSHFT  &kp Z   &kp X   &kp C   &kp V   &kp B               &trans     &trans    &trans  &trans  &trans  &trans
            &kp F8  &kp LALT                                                      &trans  &trans
                                 &tog 3  &none  &none   &trans  &trans  &trans
-                                &kp F8  &kp LALT  &kp SPACE   &trans  &trans  &mkp MB5
+                                &kp F8  &kp LALT  &kp SPACE   &mkp MB4  &trans  &mkp MB5
             >;
         };
     };

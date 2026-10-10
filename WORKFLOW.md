@@ -142,6 +142,7 @@ Use the existing left-thumb **TG3** key to toggle game mode. Layer 3 automatical
 - **Left Alt:** both left Alt positions send normal **Left Alt** while gaming, even with other layers held. Alt+Tab and other intentional Alt shortcuts work; the W+E and S+D typing combos remain disabled. Normal Alt also enables the host's configured Alt-based desktop shortcuts. On Windows, the current whkd configuration uses Alt+Esc to pause/resume those shortcuts for gaming; native Alt+Tab remains available.
 - **Kept on the left:** plain letters and numbers, dedicated Escape/Tab/Ctrl/Shift/Alt, thumb Space, and the same game toggle to exit.
 - **Right-thumb scrolling and mouse button:** MO2 (position 62) remains a momentary layer-2 hold in both modes. Hold it to make the right trackball scroll with 1/3 scaling and inverted vertical scrolling; release it to return to cursor movement. MO5 immediately to its right (position 63) sends **Mouse 5** with ordinary press/hold/release behavior while gaming, including while MO2 is held. Toggle game mode off to restore MO5 media-layer access. Other right-side bindings, existing mouse buttons, and Backspace/Enter chords remain unchanged. Other active layers do not remove the protection or the Mouse 5 override.
+- **Right-hand mouse buttons:** while gaming, **H** sends **right click**, **J** sends **Mouse 5**, and the **right Space thumb** (position 61) sends **Mouse 4**, each with ordinary press/hold/release behavior and even while MO2 is held for scrolling (layer 2's H/J tab-switching macros are blocked). The left Space thumb stays Space. Windows and ZMK both stop at five mouse buttons (left, right, middle, 4, 5); there is no "mouse 6" to bind. Toggle game mode off to restore H, J and Space.
 - **Toggle off:** normal left bindings and Escape/Tab chords return. Release held keys before toggling; already-pressed keys or combos are not retroactively cancelled.
 
 The separate built-in A+F 3-second Studio-unlock chord is disabled in all modes with `CONFIG_ZMK_STUDIO_UNLOCK_COMBO=n`. Studio still requires unlocking: with game mode off, hold Media/MO5 first, then hold the MO1 thumb, then press either explicit Studio-unlock key (the T/Y positions). This preserves access without a global gaming chord.
@@ -162,6 +163,10 @@ The existing layer-6 hardware controls are unchanged: number keys 1–5 select B
 
 With game mode off, hold the right **Media / MO5** thumb and press the **dedicated left Ctrl key** (left of A) to send the standard consumer audio-mute toggle. Press it again while holding Media to unmute. This is speaker/output mute, not microphone mute; it does not change the Ctrl/A mod-tap. Without Media, Ctrl remains Ctrl. Game protection keeps dedicated Ctrl as Ctrl and MO5 as Mouse 5. The separate keyboard-control layer still uses the dedicated Ctrl position for bootloader access.
 
+## Media playback-device cycling
+
+With game mode off, hold the right **Media / MO5** thumb and press **J** or **K** to send plain **F19** or **F20**. The keyboard does not switch audio devices itself; the host does. On the Windows desktop, whkd binds `f19`/`f20` to the dotfiles `audio-output.ps1` helper, which moves the default playback device down (J) or up (K) through the same list YASB's volume menu shows, wrapping at either end; the bar updates on its own. On hosts without a binding these are inert keypresses. Keyboard control (Media, then MO1) keeps its RGB hue/saturation keys at J/K.
+
 ## Hardware acceptance checklist
 
 Before accepting the new firmware, verify:
@@ -170,10 +175,12 @@ Before accepting the new firmware, verify:
 - All four combos and the original 50 ms combo timing with game mode off. With game mode on, W+E and S+D must remain independent keys, including when another layer was held before entering game mode; right-hand Backspace/Enter combos still work.
 - Game mode makes both left Windows positions send F8, keeps both left Alt positions as Left Alt (including Alt+Tab), keeps Ctrl/Shift/Space available, blocks higher-layer left shortcut macros, and exits using the same thumb toggle. Confirm Alt and F8 remain available while MO2 is held, without re-enabling the W+E/S+D typing combos.
 - In game mode, hold MO2 and confirm the right trackball scrolls, then release MO2 and confirm cursor movement returns. MO5 sends Mouse 5 (press/hold/release), including while MO2 is held, and does not activate layer 5. Toggle game mode off and confirm MO5 media-layer access returns and MO2 still works. Release held keys before changing modes.
+- In game mode, H right-clicks, J sends Mouse 5 and the right Space thumb sends Mouse 4 (a game's bind screen or a mouse tester shows buttons 2, 5 and 4), including while MO2 is held; the left Space thumb still types Space. Toggle game mode off and confirm H, J and both Spaces type normally.
 - The keys below comma/period send Left/Right across all layers, changing to Down/Up whenever layer 1 is active, including with higher overlays held.
 - Holding A+F for more than three seconds does not unlock a locked Studio session in either mode; explicit layer-6 unlock still works with game mode off.
 - With game mode off, Media then MO1 enters keyboard control; the reverse order does not. Check both release orders leave no stuck layer after both keys are released, and that Alt no longer activates Control.
 - With game mode off, hold MO5 and press dedicated Ctrl: output audio mutes; a second press unmutes. Release MO5 and verify normal Ctrl. Game-mode Ctrl must not mute audio.
+- With game mode off, hold MO5 and press J, then K: a key tester shows F19 then F20, and on the Windows desktop the default playback device moves down then back up. Release MO5 and verify plain J/K; Media then MO1 still adjusts RGB hue/saturation there.
 - Ctrl/A, Ctrl/semicolon, Shift/Z, and right-Shift/slash Mod-Taps and typing feel.
 - Windows Right-Alt-number, Alt-P/N, and shifted Alt-P/N shortcuts.
 - Right trackball: cursor mode normally, scrolling on layer 2, intended speed and scroll direction, unchanged cursor direction.

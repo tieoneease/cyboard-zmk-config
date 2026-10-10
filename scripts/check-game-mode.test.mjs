@@ -133,6 +133,28 @@ test('Media plus dedicated Ctrl toggles audio mute without changing base Ctrl or
   assert.equal(bindingAt(24, activeLayers([5, 6])), '&bootloader');
 });
 
+test('Media plus J/K sends F19/F20 for host playback-device cycling, and nowhere else', () => {
+  assert.deepEqual(layers[5].bindings.slice(31, 33), ['&kp F19', '&kp F20']);
+  assert.ok(right.includes(31) && right.includes(32));
+  for (const layer of [...layers.slice(0, 5), ...layers.slice(6)]) {
+    for (const position of [31, 32]) {
+      assert.notEqual(layer.bindings[position], '&kp F19', `${layer.name} ${position}`);
+      assert.notEqual(layer.bindings[position], '&kp F20', `${layer.name} ${position}`);
+    }
+  }
+  assert.deepEqual([31, 32].map((position) => bindingAt(position, activeLayers([]))), ['&kp J', '&kp K']);
+  // Game mode owns J as Mouse 5; MO5 is Mouse 5 there too, so layer 5 is only reachable if held before TG3.
+  assert.deepEqual([31, 32].map((position) => bindingAt(position, activeLayers([3]))), ['&mkp MB5', '&kp K']);
+  assert.deepEqual([31, 32].map((position) => bindingAt(position, activeLayers([3, 5]))), ['&mkp MB5', '&kp F20']);
+  for (const overlays of overlayStates) {
+    const actual = [31, 32].map((position) => bindingAt(position, activeLayers(overlays)));
+    // Keyboard control sits above Media and keeps its RGB keys there.
+    if (overlays.includes(6)) assert.deepEqual(actual, ['&rgb_ug RGB_HUD', '&rgb_ug RGB_SAD'], `overlays ${overlays}`);
+    else if (overlays.includes(5)) assert.deepEqual(actual, ['&kp F19', '&kp F20'], `overlays ${overlays}`);
+    else assert.notDeepEqual(actual, ['&kp F19', '&kp F20'], `overlays ${overlays}`);
+  }
+});
+
 test('keys below comma and period are Left/Right, or Down/Up whenever layer 1 is active', () => {
   for (const [above, below] of [[44, 50], [45, 51]]) {
     assert.equal(layout[below].col, layout[above].col);
@@ -243,8 +265,29 @@ test('MO2 retains right-trackball scroll mapping, scaling, and vertical inversio
   assert.match(scroll, /input-processors\s*=\s*<&zip_xy_scaler 1 3>,\s*<&zip_xy_to_scroll_mapper>,\s*<&zip_scroll_transform INPUT_TRANSFORM_Y_INVERT>;/);
 });
 
+test('game mode turns H, J and the right Space thumb into right click, Mouse 5 and Mouse 4 under every overlay', () => {
+  const buttons = new Map([[30, '&mkp RCLK'], [31, '&mkp MB5'], [61, '&mkp MB4']]);
+  for (const position of buttons.keys()) assert.ok(right.includes(position), `position ${position}`);
+  assert.deepEqual([30, 31, 61].map((position) => layers[0].bindings[position]), ['&kp H', '&kp J', '&kp SPACE']);
+  assert.equal(layers[7].bindings[60], '&kp SPACE', 'left Space thumb stays the jump key');
+  for (const layer of layers.slice(0, 7)) {
+    for (const [position, binding] of buttons) assert.notEqual(layer.bindings[position], binding, `${layer.name} ${position}`);
+  }
+  for (const overlays of overlayStates) {
+    const on = activeLayers([3, ...overlays]);
+    const off = activeLayers(overlays);
+    for (const [position, binding] of buttons) {
+      assert.equal(bindingAt(position, on), binding, `game on, position ${position}, overlays ${overlays}`);
+      assert.notEqual(bindingAt(position, off), binding, `game off, position ${position}, overlays ${overlays}`);
+    }
+  }
+  // Layer 2 puts tab-switching macros on H/J; holding MO2 to scroll must not leak them while gaming.
+  assert.deepEqual([30, 31].map((position) => bindingAt(position, activeLayers([2]))), ['&kp LC(LS(PG_UP))', '&kp LC(LS(TAB))']);
+  assert.deepEqual([30, 31].map((position) => bindingAt(position, activeLayers([3, 2]))), ['&mkp RCLK', '&mkp MB5']);
+});
+
 test('other right-hand bindings and global Backspace/Enter chords are not masked by the guard', () => {
-  const unchangedRight = right.filter(position => position !== 63);
+  const unchangedRight = right.filter(position => ![30, 31, 61, 63].includes(position));
   for (const position of unchangedRight) assert.equal(layers.at(-1).bindings[position], '&trans', `position ${position}`);
   for (const overlays of overlayStates) {
     const active = activeLayers([3, ...overlays]);
